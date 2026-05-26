@@ -7,7 +7,6 @@ import com.bigbank.dragons.client.dto.SolveResponseDto;
 import com.bigbank.dragons.game.ProbabilityEstimator;
 import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.game.state.GameState;
-import com.bigbank.dragons.game.state.GameStatusHolder;
 import com.bigbank.dragons.service.GameRunnerService;
 import com.bigbank.dragons.service.GameService;
 import com.bigbank.dragons.service.ShopService;
@@ -33,14 +32,12 @@ public class GameRunnerServiceImpl implements GameRunnerService {
   private final TaskService taskService;
   private final ShopService shopService;
   private final StatisticsService statisticsService;
-  private final GameStatusHolder statusHolder;
   private final GameProperties props;
 
   @Override
   public GameState playGame() {
     GameState state = gameService.start(); // may throw -> propagates, not counted
     ProbabilityEstimator estimator = new ProbabilityEstimator();
-    statusHolder.gameStarted();
     log.info(
         "Started game {} (lives={}, gold={})",
         state.getGameId(),
@@ -100,7 +97,6 @@ public class GameRunnerServiceImpl implements GameRunnerService {
       return state;
     } finally {
       statisticsService.addGameScore(state.getScore());
-      statusHolder.gameFinished(state);
     }
   }
 

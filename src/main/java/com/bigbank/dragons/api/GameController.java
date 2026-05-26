@@ -2,10 +2,7 @@ package com.bigbank.dragons.api;
 
 import com.bigbank.dragons.api.dto.BatchStatsDto;
 import com.bigbank.dragons.api.dto.GameResultDto;
-import com.bigbank.dragons.api.dto.GameStatusDto;
 import com.bigbank.dragons.client.dto.ReputationDto;
-import com.bigbank.dragons.game.state.GameState;
-import com.bigbank.dragons.game.state.GameStatusHolder;
 import com.bigbank.dragons.mapper.GameResultMapper;
 import com.bigbank.dragons.service.GameRunnerService;
 import com.bigbank.dragons.service.InvestigateService;
@@ -30,7 +27,6 @@ public class GameController {
   private final GameRunnerService gameRunnerService;
   private final InvestigateService investigateService;
   private final GameResultMapper gameResultMapper;
-  private final GameStatusHolder statusHolder;
 
   /** Play a single game to completion and return the result + decision log. */
   @PostMapping("/play")
@@ -42,14 +38,6 @@ public class GameController {
   @PostMapping("/play/batch")
   public BatchStatsDto playBatch(@RequestParam(defaultValue = "50") @Min(1) @Max(500) int games) {
     return gameRunnerService.playBatch(games);
-  }
-
-  /** Whether any game is running, plus the most recent finished result. */
-  @GetMapping("/status")
-  public GameStatusDto status() {
-    GameState last = statusHolder.last();
-    return new GameStatusDto(
-        statusHolder.running() > 0, last == null ? null : gameResultMapper.toDto(last));
   }
 
   /** Investigate reputation for a given game. */
