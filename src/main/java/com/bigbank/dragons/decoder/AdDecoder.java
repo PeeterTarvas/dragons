@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdDecoder {
 
-  /** Returns a plaintext copy of the ad, decoding fields if needed. */
   public MessageDto decode(MessageDto ad) {
     if (ad == null) {
       return null;
@@ -26,12 +25,12 @@ public class AdDecoder {
               base64(ad.probability()));
       case 2 ->
           new MessageDto(
-              rot13(base64(ad.adId())),
-              rot13(base64(ad.message())),
+              rot13(ad.adId()),
+              rot13(ad.message()),
               ad.reward(),
               ad.expiresIn(),
               null,
-              rot13(base64(ad.probability())));
+              rot13(ad.probability()));
       default -> ad;
     };
   }

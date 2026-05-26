@@ -3,7 +3,6 @@ package com.bigbank.dragons.game;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Per-game success-rate tracker: priors smoothed toward observed outcomes. */
 public class ProbabilityEstimator {
 
   private static final Map<String, Double> PRIORS =

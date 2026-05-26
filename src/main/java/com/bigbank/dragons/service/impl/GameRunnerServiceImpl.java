@@ -1,63 +1,64 @@
 package com.bigbank.dragons.service.impl;
 
-import com.bigbank.dragons.api.dto.GameResultDto;
-import com.bigbank.dragons.api.dto.GameStatusDto;
+import com.bigbank.dragons.api.dto.BatchStatsDto;
 import com.bigbank.dragons.api.dto.TurnLogDto;
-import com.bigbank.dragons.client.MugloarClient;
-import com.bigbank.dragons.client.dto.*;
-import com.bigbank.dragons.decoder.AdDecoder;
+import com.bigbank.dragons.client.dto.MessageDto;
+import com.bigbank.dragons.client.dto.SolveResponseDto;
 import com.bigbank.dragons.game.ProbabilityEstimator;
+import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.game.state.GameState;
-import com.bigbank.dragons.mapper.GameStateMapper;
+import com.bigbank.dragons.game.state.GameStatusHolder;
 import com.bigbank.dragons.service.GameRunnerService;
-import com.bigbank.dragons.strategy.GameStrategy;
+import com.bigbank.dragons.service.GameService;
+import com.bigbank.dragons.service.ShopService;
+import com.bigbank.dragons.service.StatisticsService;
+import com.bigbank.dragons.service.TaskService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameRunnerServiceImpl implements GameRunnerService {
 
-  private static final int MIN_TARGET_SCORE = 1000;
-  private static final int MAX_TURNS = 1000;
+  private final GameService gameService;
+  private final TaskService taskService;
+  private final ShopService shopService;
+  private final StatisticsService statisticsService;
+  private final GameStatusHolder statusHolder;
+  private final GameProperties props;
 
-  private final MugloarClient client;
-  private final GameStrategy strategy;
-  private final AdDecoder decoder;
-  private final GameStateMapper gameStateMapper;
-
-  private volatile GameState lastResult = null;
-  private volatile boolean reached = false;
-
-
+  @Override
   public GameState playGame() {
-    StartGameResponseDto start = client.startGame();
-    GameState state = gameStateMapper.toEntity(start);
+    GameState state = gameService.start(); // may throw -> propagates, not counted
     ProbabilityEstimator estimator = new ProbabilityEstimator();
+    statusHolder.gameStarted();
+    log.info(
+        "Started game {} (lives={}, gold={})",
+        state.getGameId(),
+        state.getLives(),
+        state.getGold());
+
     try {
-      log.info(
-          "Started game {} (lives={}, gold={})",
-          state.getGameId(),
-          state.getLives(),
-          state.getGold());
+      while (state.isAlive() && state.getTurn() < props.maxTurns()) {
 
-      while (state.isAlive() && state.getTurn() < MAX_TURNS) {
-
-        maybeShop(state);
+        shopService.shop(state);
         if (!state.isAlive()) break;
 
-        List<MessageDto> ads =
-            client.getMessages(state.getGameId()).stream().map(decoder::decode).toList();
+        List<MessageDto> ads = taskService.getTasks(state.getGameId());
+        Optional<MessageDto> choice = taskService.chooseTask(ads, state, estimator);
 
-        Optional<MessageDto> choice = strategy.chooseAd(ads, state, estimator);
         if (choice.isEmpty()) {
-          log.info("Turn {}: no acceptable ad, attempting upgrade", state.getTurn());
-          if (!attemptUpgrade(state)) {
+          log.info("Turn {}: no acceptable ad, trying an upgrade", state.getTurn());
+          if (!shopService.shop(state)) {
             log.info("Turn {}: nothing to do, ending run", state.getTurn());
             break;
           }
@@ -65,14 +66,12 @@ public class GameRunnerServiceImpl implements GameRunnerService {
         }
 
         MessageDto ad = choice.get();
-        SolveResponseDto result = client.solve(state.getGameId(), ad.adId());
-        reached = state.getScore() >= MIN_TARGET_SCORE;
-
-
+        SolveResponseDto result = taskService.solve(state, ad);
         state.update(result.lives(), result.gold(), result.score(), result.turn());
         estimator.record(ad.probability(), result.success());
+
         log.info(
-            "Turn {}: solve '{}' [{}] -> {} (score={}, lives={})",
+            "Turn {}: '{}' [{}] -> {} (score={}, lives={})",
             result.turn(),
             ad.message(),
             ad.probability(),
@@ -91,56 +90,59 @@ public class GameRunnerServiceImpl implements GameRunnerService {
                 result.gold()));
       }
 
+      state.markReachedGoal(state.getScore() >= props.targetScore());
       log.info(
-          "Game {} finished: score={}, turns={}, target={}",
+          "Game {} finished: score={}, turns={}, reached={}",
           state.getGameId(),
           state.getScore(),
           state.getTurn(),
-          reached);
-
-      if (reached && !state.isReachedGoal()) {
-        state.markReachedGoal(reached);
-      }
-
-      lastResult = state;
+          state.isReachedGoal());
       return state;
     } finally {
-      lastResult = state;
+      statisticsService.addGameScore(state.getScore());
+      statusHolder.gameFinished(state);
     }
   }
 
-  private void maybeShop(GameState state) {
-    List<ShopItemDto> items = client.getShop(state.getGameId());
-    strategy.choosePurchase(items, state).ifPresent(item -> buy(state, item));
+  @Override
+  public BatchStatsDto playBatch(int games) {
+    statisticsService.reset();
+    ExecutorService pool = Executors.newFixedThreadPool(props.threadPoolSize());
+    try {
+      List<Future<?>> futures = new ArrayList<>(games);
+      for (int i = 0; i < games; i++) {
+        futures.add(pool.submit(this::playGameSafely));
+      }
+      for (Future<?> f : futures) {
+        try {
+          f.get();
+        } catch (Exception e) {
+          log.warn("A game failed and was skipped: {}", e.getMessage());
+        }
+      }
+    } finally {
+      pool.shutdown();
+      try {
+        if (!pool.awaitTermination(1, TimeUnit.HOURS)) {
+          log.error("Batch did not finish within timeout");
+          pool.shutdownNow();
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        pool.shutdownNow();
+      }
+    }
+    BatchStatsDto stats = statisticsService.snapshot();
+    log.info("Batch finished: {}", stats);
+    return stats;
   }
 
-  private boolean attemptUpgrade(GameState state) {
-    List<ShopItemDto> items = client.getShop(state.getGameId());
-    Optional<ShopItemDto> pick = strategy.choosePurchase(items, state);
-    pick.ifPresent(item -> buy(state, item));
-    return pick.isPresent();
+  /** Wrapper so one failed game doesn't kill the batch; failures are simply not recorded. */
+  private void playGameSafely() {
+    try {
+      playGame();
+    } catch (Exception e) {
+      log.warn("Game run failed: {}", e.getMessage());
+    }
   }
-
-  private void buy(GameState state, ShopItemDto item) {
-    BuyResponseDto buy = client.buy(state.getGameId(), item.id());
-    state.updateAfterBuy(buy.gold(), buy.lives(), buy.level(), buy.turn());
-    log.info(
-        "Bought '{}' for gold; now gold={}, lives={}, level={}",
-        item.name(),
-        buy.gold(),
-        buy.lives(),
-        buy.level());
-    state.addLog(
-        new TurnLogDto(
-            buy.turn(),
-            "BUY",
-            item.name(),
-            null,
-            buy.shoppingSuccess(),
-            state.getScore(),
-            buy.lives(),
-            buy.gold()));
-  }
-
-
 }

@@ -10,16 +10,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class InvestigateServiceImpl implements InvestigateService {
 
-    private final MugloarClient mugloarClient;
+  private final MugloarClient mugloarClient;
 
-    @Override
-    public ReputationDto investigate(String gameId) {
-        return mugloarClient.investigate(gameId);
-    }
+  @Override
+  public ReputationDto investigate(String gameId) {
+    return mugloarClient.investigate(gameId);
+  }
 
-    @Override
-    public double calculateScore(String gameId) {
-        ReputationDto reputationDto = investigate(gameId);
-        return  reputationDto.state() + reputationDto.people() + reputationDto.underworld();
-    }
+  @Override
+  public double calculateScore(String gameId) {
+    ReputationDto reputationDto = investigate(gameId);
+    return reputationDto.state() + reputationDto.people() + reputationDto.underworld();
+  }
 }

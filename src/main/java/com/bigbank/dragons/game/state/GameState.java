@@ -3,7 +3,6 @@ package com.bigbank.dragons.game.state;
 import com.bigbank.dragons.api.dto.TurnLogDto;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -46,5 +45,4 @@ public class GameState {
   public boolean isAlive() {
     return lives > 0;
   }
-
 }

@@ -10,7 +10,8 @@ import java.util.Optional;
 public interface GameStrategy {
 
   /** Pick the best ad to attempt, or empty if none are worth attempting. */
-  Optional<MessageDto> chooseAd(List<MessageDto> ads, GameState state, ProbabilityEstimator estimator);
+  Optional<MessageDto> chooseAd(
+      List<MessageDto> ads, GameState state, ProbabilityEstimator estimator);
 
   Optional<ShopItemDto> choosePurchase(List<ShopItemDto> shopItemDtos, GameState state);
 }

@@ -20,7 +20,7 @@ public class ExpectedValueStrategy implements GameStrategy {
 
   @Override
   public Optional<MessageDto> chooseAd(
-          List<MessageDto> ads, GameState state, ProbabilityEstimator estimator) {
+      List<MessageDto> ads, GameState state, ProbabilityEstimator estimator) {
     return ads.stream()
         .filter(ad -> estimator.estimate(ad.probability()) >= PROBABILITY_FLOOR)
         .max(Comparator.comparingDouble(ad -> expectedValue(ad, estimator)));

@@ -55,12 +55,17 @@ public class MugloarClient {
   public List<ShopItemDto> getShop(String gameId) {
     requireGameId(gameId);
     try {
-      ShopListing listing =
-          restClient.get().uri("/api/v2/{gameId}/shop", gameId).retrieve().body(ShopListing.class);
-      if (listing == null || listing.items() == null) {
+      List<ShopItemDto> items =
+          restClient
+              .get()
+              .uri("/api/v2/{gameId}/shop", gameId)
+              .retrieve()
+              .body(new ParameterizedTypeReference<>() {});
+
+      if (items == null) {
         throw new MugloarApiException("Shop returned no items for game " + gameId);
       }
-      return listing.items();
+      return items;
     } catch (RestClientException e) {
       throw new MugloarApiException("Failed to fetch shop for game " + gameId, e);
     }
@@ -91,7 +96,4 @@ public class MugloarClient {
       throw new IllegalArgumentException("gameId must not be blank");
     }
   }
-
-  /** The shop endpoint wraps its array in an {@code items} field. */
-  private record ShopListing(List<ShopItemDto> items) {}
 }

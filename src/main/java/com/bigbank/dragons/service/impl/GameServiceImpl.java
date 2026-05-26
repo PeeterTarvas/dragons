@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
 
-    private final MugloarClient client;
-    private final GameStateMapper gameStateMapper;
+  private final MugloarClient client;
+  private final GameStateMapper gameStateMapper;
 
-    @Override
-    public GameState start() {
-        return gameStateMapper.toEntity(client.startGame());
-    }
+  @Override
+  public GameState start() {
+    return gameStateMapper.toEntity(client.startGame());
+  }
 }

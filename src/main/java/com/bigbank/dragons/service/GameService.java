@@ -4,5 +4,5 @@ import com.bigbank.dragons.game.state.GameState;
 
 public interface GameService {
 
-    GameState start();
+  GameState start();
 }

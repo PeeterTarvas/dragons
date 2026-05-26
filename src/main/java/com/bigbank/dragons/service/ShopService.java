@@ -4,5 +4,5 @@ import com.bigbank.dragons.game.state.GameState;
 
 public interface ShopService {
 
-    boolean shop(GameState state);
+  boolean shop(GameState state);
 }
