@@ -5,3 +5,4 @@ services refactor to different folders + entities and mappers so that wont retur
 add enums to game state
 mby pass strategy as a parameter - optional
 some optionals should be added in client so no null checks
+better exception handler for api
