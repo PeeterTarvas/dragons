@@ -15,8 +15,8 @@ public class MugloarClientConfig {
   RestClient mugloarRestClient(MugloarProperties properties) {
     var settings =
         HttpClientSettings.defaults()
-            .withConnectTimeout(Duration.ofSeconds(5))
-            .withReadTimeout(Duration.ofSeconds(10));
+            .withConnectTimeout(Duration.ofSeconds(properties.connectionTimeout()))
+            .withReadTimeout(Duration.ofSeconds(properties.readTimeout()));
 
     var requestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
 

@@ -4,7 +4,10 @@ spring:
 
 mugloar:
   base-url: https://dragonsofmugloar.com
-
+  connection-timeout: 10
+  read-timeout: 30
+  max-attempts: 4
+  initial-backoff-ms: 500
 
 springdoc:
   api-docs:
@@ -17,5 +20,5 @@ springdoc:
 game:
   target-score: 1000
   max-turns: 1000
-  thread-pool-size: 4
+  thread-pool-size: 3
   batch-size: 50
