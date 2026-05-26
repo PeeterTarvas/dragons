@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.0.6'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.bigbank'
@@ -17,6 +18,18 @@ repositories {
 	mavenCentral()
 }
 
+spotless {
+	java {
+		targetExclude 'build/**'
+
+		googleJavaFormat("1.27.0")
+		removeUnusedImports()
+
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-h2console'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -24,6 +37,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'io.github.wimdeblauwe:htmx-spring-boot:5.1.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
+	implementation("org.springframework.boot:spring-boot-http-client:4.0.6")
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
@@ -37,6 +51,13 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
+
+
 tasks.named('test') {
 	useJUnitPlatform()
+	jvmArgs("-XX:+EnableDynamicAgentLoading")
+	testLogging {
+		events 'passed', 'skipped', 'failed'
+		showStandardStreams = false
+	}
 }
