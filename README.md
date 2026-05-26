@@ -3,3 +3,5 @@ strategy optimization
 testing - unit, integration (mby integration)
 services refactor to different folders + entities and mappers so that wont return/handle dtos
 add enums to game state
+mby pass strategy as a parameter - optional
+some optionals should be added in client so no null checks
