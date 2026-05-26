@@ -7,7 +7,7 @@ package com.bigbank.dragons.client.dto;
  * Jackson coerces both forms into an int by default, so this field tolerates either. {@code
  * encrypted} is null for plain ads and a cipher code (0, 1, 2…) for encoded ones.
  */
-public record Message(
+public record MessageDto(
     String adId,
     String message,
     int reward,

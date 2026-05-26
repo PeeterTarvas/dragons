@@ -17,42 +17,42 @@ public class MugloarClient {
     this.restClient = mugloarRestClient;
   }
 
-  public StartGameResponse startGame() {
-    return post("/api/v2/game/start", StartGameResponse.class);
+  public StartGameResponseDto startGame() {
+    return post("/api/v2/game/start", StartGameResponseDto.class);
   }
 
-  public Reputation investigate(String gameId) {
+  public ReputationDto investigate(String gameId) {
     requireGameId(gameId);
-    return post("/api/v2/{gameId}/investigate/reputation", Reputation.class, gameId);
+    return post("/api/v2/{gameId}/investigate/reputation", ReputationDto.class, gameId);
   }
 
-  public List<Message> getMessages(String gameId) {
+  public List<MessageDto> getMessages(String gameId) {
     requireGameId(gameId);
     try {
-      List<Message> messages =
+      List<MessageDto> messageDtos =
           restClient
               .get()
               .uri("/api/v2/{gameId}/messages", gameId)
               .retrieve()
-              .body(new ParameterizedTypeReference<List<Message>>() {});
-      if (messages == null) {
+              .body(new ParameterizedTypeReference<List<MessageDto>>() {});
+      if (messageDtos == null) {
         throw new MugloarApiException("Messageboard returned no body for game " + gameId);
       }
-      return messages;
+      return messageDtos;
     } catch (RestClientException e) {
       throw new MugloarApiException("Failed to fetch messages for game " + gameId, e);
     }
   }
 
-  public SolveResponse solve(String gameId, String adId) {
+  public SolveResponseDto solve(String gameId, String adId) {
     requireGameId(gameId);
     if (adId == null || adId.isBlank()) {
       throw new IllegalArgumentException("adId must not be blank");
     }
-    return post("/api/v2/{gameId}/solve/{adId}", SolveResponse.class, gameId, adId);
+    return post("/api/v2/{gameId}/solve/{adId}", SolveResponseDto.class, gameId, adId);
   }
 
-  public List<ShopItem> getShop(String gameId) {
+  public List<ShopItemDto> getShop(String gameId) {
     requireGameId(gameId);
     try {
       ShopListing listing =
@@ -66,12 +66,12 @@ public class MugloarClient {
     }
   }
 
-  public BuyResponse buy(String gameId, String itemId) {
+  public BuyResponseDto buy(String gameId, String itemId) {
     requireGameId(gameId);
     if (itemId == null || itemId.isBlank()) {
       throw new IllegalArgumentException("itemId must not be blank");
     }
-    return post("/api/v2/{gameId}/shop/buy/{itemId}", BuyResponse.class, gameId, itemId);
+    return post("/api/v2/{gameId}/shop/buy/{itemId}", BuyResponseDto.class, gameId, itemId);
   }
 
   private <T> T post(String uri, Class<T> type, Object... uriVars) {
@@ -93,5 +93,5 @@ public class MugloarClient {
   }
 
   /** The shop endpoint wraps its array in an {@code items} field. */
-  private record ShopListing(List<ShopItem> items) {}
+  private record ShopListing(List<ShopItemDto> items) {}
 }

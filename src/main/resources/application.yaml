@@ -13,3 +13,9 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: method
     tags-sorter: alpha
+
+game:
+  target-score: 1000
+  max-turns: 1000
+  thread-pool-size: 4
+  batch-size: 50
