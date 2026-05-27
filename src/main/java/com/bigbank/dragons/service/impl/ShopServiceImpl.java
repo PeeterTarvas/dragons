@@ -1,14 +1,15 @@
 package com.bigbank.dragons.service.impl;
 
-import com.bigbank.dragons.api.dto.TurnLogDto;
 import com.bigbank.dragons.client.MugloarClient;
-import com.bigbank.dragons.client.dto.BuyResponseDto;
-import com.bigbank.dragons.client.dto.ShopItemDto;
+import com.bigbank.dragons.domain.BuyResponse;
+import com.bigbank.dragons.domain.ShopItem;
+import com.bigbank.dragons.domain.TurnLog;
 import com.bigbank.dragons.game.state.GameState;
+import com.bigbank.dragons.mapper.GameMapper;
 import com.bigbank.dragons.service.ShopService;
 import com.bigbank.dragons.strategy.GameStrategy;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,30 +20,41 @@ import org.springframework.stereotype.Service;
 public class ShopServiceImpl implements ShopService {
 
   private final MugloarClient client;
-  private final GameStrategy strategy;
+  private final GameMapper mapper;
 
   @Override
-  public boolean shop(GameState state) {
-    List<ShopItemDto> items = client.getShop(state.getGameId());
-    Optional<ShopItemDto> pick = strategy.choosePurchase(items, state);
-    pick.ifPresent(item -> buy(state, item));
-    return pick.isPresent();
+  public List<ShopItem> shop(GameState state, GameStrategy strategy) {
+    List<ShopItem> items =
+        client.getShop(state.getGameId()).stream().map(mapper::toDomain).toList();
+    List<ShopItem> plan = strategy.choosePurchases(items, state);
+    List<ShopItem> itemsBought = new ArrayList<>();
+
+    for (ShopItem item : plan) {
+      if (item.cost() > state.getGold()) {
+        continue;
+      }
+      buy(state, item);
+      itemsBought.add(item);
+    }
+    return itemsBought;
   }
 
-  private void buy(GameState state, ShopItemDto item) {
-    BuyResponseDto buy = client.buy(state.getGameId(), item.id());
-    state.updateAfterBuy(buy.gold(), buy.lives(), buy.level(), buy.turn());
-    log.debug(
-        "Bought '{}'; now gold={}, lives={}, level={}",
-        item.name(),
-        buy.gold(),
-        buy.lives(),
-        buy.level());
+  private void buy(GameState state, ShopItem item) {
+    BuyResponse buy = mapper.toDomain(client.buy(state.getGameId(), item.id()));
+    state.updateAfterBuy(buy);
+    if (buy.shoppingSuccess()) {
+      log.info(
+          "Bought '{}'; now gold={}, lives={}, level={}",
+          item.name(),
+          buy.gold(),
+          buy.lives(),
+          buy.level());
+    }
     state.addLog(
-        new TurnLogDto(
+        new TurnLog(
             buy.turn(),
             "BUY",
-            item.name(),
+            // item.name(),
             null,
             buy.shoppingSuccess(),
             state.getScore(),

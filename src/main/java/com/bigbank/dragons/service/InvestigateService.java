@@ -1,10 +1,10 @@
 package com.bigbank.dragons.service;
 
-import com.bigbank.dragons.client.dto.ReputationDto;
+import com.bigbank.dragons.domain.Reputation;
 
 public interface InvestigateService {
 
-  ReputationDto investigate(String gameId);
+  Reputation investigate(String gameId);
 
-  double calculateScore(String gameId);
+  double calculateReputation(String gameId);
 }

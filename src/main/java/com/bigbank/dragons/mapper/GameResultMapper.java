@@ -5,7 +5,7 @@ import com.bigbank.dragons.game.state.GameState;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = GameMapper.class)
 public interface GameResultMapper {
 
   @Mapping(source = "score", target = "finalScore")

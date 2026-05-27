@@ -1,13 +1,14 @@
 package com.bigbank.dragons.service;
 
-import com.bigbank.dragons.api.dto.BatchStatsDto;
+import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.game.state.GameState;
+import com.bigbank.dragons.strategy.StrategyType;
 
 public interface GameRunnerService {
 
   /** Play one full game to completion. */
-  GameState playGame();
+  GameState playGame(StrategyType strategyType);
 
   /** Play N games concurrently and return aggregate statistics. */
-  BatchStatsDto playBatch(int games);
+  BatchStats playBatch(int games, StrategyType strategyType);
 }

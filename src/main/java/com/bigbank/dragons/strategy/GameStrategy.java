@@ -1,17 +1,16 @@
 package com.bigbank.dragons.strategy;
 
-import com.bigbank.dragons.client.dto.MessageDto;
-import com.bigbank.dragons.client.dto.ShopItemDto;
-import com.bigbank.dragons.game.ProbabilityEstimator;
+import com.bigbank.dragons.domain.Message;
+import com.bigbank.dragons.domain.ShopItem;
 import com.bigbank.dragons.game.state.GameState;
+import com.bigbank.dragons.probability.ProbabilityEstimator;
 import java.util.List;
-import java.util.Optional;
 
 public interface GameStrategy {
+  StrategyType type();
 
   /** Pick the best ad to attempt, or empty if none are worth attempting. */
-  Optional<MessageDto> chooseAd(
-      List<MessageDto> ads, GameState state, ProbabilityEstimator estimator);
+  Message chooseAd(List<Message> ads, GameState state, ProbabilityEstimator estimator);
 
-  Optional<ShopItemDto> choosePurchase(List<ShopItemDto> shopItemDtos, GameState state);
+  List<ShopItem> choosePurchases(List<ShopItem> shopItems, GameState state);
 }

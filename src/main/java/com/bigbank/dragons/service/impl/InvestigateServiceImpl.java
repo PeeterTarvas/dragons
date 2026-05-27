@@ -1,7 +1,8 @@
 package com.bigbank.dragons.service.impl;
 
 import com.bigbank.dragons.client.MugloarClient;
-import com.bigbank.dragons.client.dto.ReputationDto;
+import com.bigbank.dragons.domain.Reputation;
+import com.bigbank.dragons.mapper.GameMapper;
 import com.bigbank.dragons.service.InvestigateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,15 +12,16 @@ import org.springframework.stereotype.Service;
 public class InvestigateServiceImpl implements InvestigateService {
 
   private final MugloarClient mugloarClient;
+  private final GameMapper mapper;
 
   @Override
-  public ReputationDto investigate(String gameId) {
-    return mugloarClient.investigate(gameId);
+  public Reputation investigate(String gameId) {
+    return mapper.toDomain(mugloarClient.investigate(gameId));
   }
 
   @Override
-  public double calculateScore(String gameId) {
-    ReputationDto reputationDto = investigate(gameId);
+  public double calculateReputation(String gameId) {
+    Reputation reputationDto = investigate(gameId);
     return reputationDto.state() + reputationDto.people() + reputationDto.underworld();
   }
 }

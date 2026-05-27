@@ -1,20 +1,19 @@
 package com.bigbank.dragons.service.impl;
 
-import com.bigbank.dragons.api.dto.BatchStatsDto;
-import com.bigbank.dragons.api.dto.TurnLogDto;
-import com.bigbank.dragons.client.dto.MessageDto;
-import com.bigbank.dragons.client.dto.SolveResponseDto;
-import com.bigbank.dragons.game.ProbabilityEstimator;
+import com.bigbank.dragons.domain.BatchStats;
+import com.bigbank.dragons.domain.Message;
+import com.bigbank.dragons.domain.SolveResponse;
+import com.bigbank.dragons.domain.TurnLog;
 import com.bigbank.dragons.game.config.GameProperties;
+import com.bigbank.dragons.game.enums.Result;
 import com.bigbank.dragons.game.state.GameState;
-import com.bigbank.dragons.service.GameRunnerService;
-import com.bigbank.dragons.service.GameService;
-import com.bigbank.dragons.service.ShopService;
-import com.bigbank.dragons.service.StatisticsService;
-import com.bigbank.dragons.service.TaskService;
+import com.bigbank.dragons.probability.ProbabilityEstimator;
+import com.bigbank.dragons.service.*;
+import com.bigbank.dragons.strategy.GameStrategy;
+import com.bigbank.dragons.strategy.StrategyRegistry;
+import com.bigbank.dragons.strategy.StrategyType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -33,9 +32,12 @@ public class GameRunnerServiceImpl implements GameRunnerService {
   private final ShopService shopService;
   private final StatisticsService statisticsService;
   private final GameProperties props;
+  private final InvestigateService investigateService;
+  private final StrategyRegistry strategyRegistry;
 
   @Override
-  public GameState playGame() {
+  public GameState playGame(StrategyType strategyType) {
+    GameStrategy strategy = strategyRegistry.resolve(strategyType);
     GameState state = gameService.start(); // may throw -> propagates, not counted
     ProbabilityEstimator estimator = new ProbabilityEstimator();
     log.info(
@@ -47,38 +49,29 @@ public class GameRunnerServiceImpl implements GameRunnerService {
     try {
       while (state.isAlive() && state.getTurn() < props.maxTurns()) {
 
-        shopService.shop(state);
-        if (!state.isAlive()) break;
+        List<Message> ads = taskService.getTasks(state.getGameId());
+        Message ad = taskService.chooseTask(ads, state, estimator, strategy);
+        SolveResponse result = taskService.solve(state, ad);
 
-        List<MessageDto> ads = taskService.getTasks(state.getGameId());
-        Optional<MessageDto> choice = taskService.chooseTask(ads, state, estimator);
-
-        if (choice.isEmpty()) {
-          log.info("Turn {}: no acceptable ad, trying an upgrade", state.getTurn());
-          if (!shopService.shop(state)) {
-            log.info("Turn {}: nothing to do, ending run", state.getTurn());
-            break;
-          }
-          continue;
-        }
-
-        MessageDto ad = choice.get();
-        SolveResponseDto result = taskService.solve(state, ad);
+        // double = investigateService.calculateScore(state.getGameId());
         state.update(result.lives(), result.gold(), result.score(), result.turn());
         estimator.record(ad.probability(), result.success());
+
+        if (state.isAlive()) {
+          shopService.shop(state, strategy);
+        }
 
         log.info(
             "Turn {}: '{}' [{}] -> {} (score={}, lives={})",
             result.turn(),
             ad.message(),
             ad.probability(),
-            result.success() ? "WIN" : "LOSS",
+            result.success() ? Result.WIN : Result.LOSS,
             result.score(),
             result.lives());
         state.addLog(
-            new TurnLogDto(
+            new TurnLog(
                 result.turn(),
-                "SOLVE",
                 ad.message(),
                 ad.probability(),
                 result.success(),
@@ -101,13 +94,13 @@ public class GameRunnerServiceImpl implements GameRunnerService {
   }
 
   @Override
-  public BatchStatsDto playBatch(int games) {
+  public BatchStats playBatch(int games, StrategyType strategyType) {
     statisticsService.reset();
     ExecutorService pool = Executors.newFixedThreadPool(props.threadPoolSize());
     try {
       List<Future<?>> futures = new ArrayList<>(games);
       for (int i = 0; i < games; i++) {
-        futures.add(pool.submit(this::playGameSafely));
+        futures.add(pool.submit(() -> playGameSafely(strategyType)));
       }
       for (Future<?> f : futures) {
         try {
@@ -128,15 +121,15 @@ public class GameRunnerServiceImpl implements GameRunnerService {
         pool.shutdownNow();
       }
     }
-    BatchStatsDto stats = statisticsService.snapshot();
+    BatchStats stats = statisticsService.snapshot();
     log.info("Batch finished: {}", stats);
     return stats;
   }
 
   /** Wrapper so one failed game doesn't kill the batch; failures are simply not recorded. */
-  private void playGameSafely() {
+  private void playGameSafely(StrategyType strategyType) {
     try {
-      playGame();
+      playGame(strategyType);
     } catch (Exception e) {
       log.warn("Game run failed: {}", e.getMessage());
     }

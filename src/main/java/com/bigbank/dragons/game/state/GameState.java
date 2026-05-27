@@ -1,6 +1,7 @@
 package com.bigbank.dragons.game.state;
 
-import com.bigbank.dragons.api.dto.TurnLogDto;
+import com.bigbank.dragons.domain.BuyResponse;
+import com.bigbank.dragons.domain.TurnLog;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,31 +15,31 @@ public class GameState {
   private int lives;
   private int gold;
   private int level;
-  private int score;
+  private double score;
   private int turn;
   private boolean reachedGoal;
 
-  private final List<TurnLogDto> log = new ArrayList<>();
+  private final List<TurnLog> log = new ArrayList<>();
 
-  public void update(int lives, int gold, int score, int turn) {
+  public void update(int lives, int gold, double score, int turn) {
     this.lives = lives;
     this.gold = gold;
     this.score = score;
     this.turn = turn;
   }
 
-  public void updateAfterBuy(int gold, int lives, int level, int turn) {
-    this.gold = gold;
-    this.lives = lives;
-    this.level = level;
-    this.turn = turn;
+  public void updateAfterBuy(BuyResponse buyResponse) {
+    this.gold = buyResponse.gold();
+    this.lives = buyResponse.lives();
+    this.level = buyResponse.level();
+    this.turn = buyResponse.turn();
   }
 
   public void markReachedGoal(boolean reached) {
     this.reachedGoal = reached;
   }
 
-  public void addLog(TurnLogDto entry) {
+  public void addLog(TurnLog entry) {
     log.add(entry);
   }
 

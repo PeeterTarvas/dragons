@@ -1,12 +1,9 @@
 package com.bigbank.dragons.service.impl;
 
-import com.bigbank.dragons.api.dto.BatchStatsDto;
+import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.service.StatisticsService;
-import java.util.ArrayList;
-import java.util.IntSummaryStatistics;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +15,10 @@ import org.springframework.stereotype.Service;
 public class StatisticsServiceImpl implements StatisticsService {
 
   private final GameProperties props;
-  private final Queue<Integer> scores = new ConcurrentLinkedQueue<>();
+  private final Queue<Double> scores = new ConcurrentLinkedQueue<>();
 
   @Override
-  public void addGameScore(int score) {
+  public void addGameScore(double score) {
     scores.add(score);
   }
 
@@ -31,18 +28,19 @@ public class StatisticsServiceImpl implements StatisticsService {
   }
 
   @Override
-  public BatchStatsDto snapshot() {
-    List<Integer> snap = new ArrayList<>(scores);
+  public BatchStats snapshot() {
+    List<Double> snap = new ArrayList<>(scores);
     if (snap.isEmpty()) {
-      return new BatchStatsDto(0, 0, 0, 0, 0, 0);
+      return new BatchStats(0, 0, 0, 0, 0, 0);
     }
-    IntSummaryStatistics st = snap.stream().mapToInt(Integer::intValue).summaryStatistics();
+    DoubleSummaryStatistics statistics =
+        snap.stream().mapToDouble(Double::doubleValue).summaryStatistics();
     long reached = snap.stream().filter(s -> s >= props.targetScore()).count();
-    return new BatchStatsDto(
+    return new BatchStats(
         snap.size(),
-        st.getAverage(),
-        st.getMax(),
-        st.getMin(),
+        statistics.getAverage(),
+        statistics.getMax(),
+        statistics.getMin(),
         reached,
         reached * 100.0 / snap.size());
   }

@@ -1,11 +1,11 @@
 package com.bigbank.dragons.service;
 
-import com.bigbank.dragons.api.dto.BatchStatsDto;
+import com.bigbank.dragons.domain.BatchStats;
 
 public interface StatisticsService {
-  void addGameScore(int score);
+  void addGameScore(double score);
 
-  BatchStatsDto snapshot();
+  BatchStats snapshot();
 
   void reset();
 }

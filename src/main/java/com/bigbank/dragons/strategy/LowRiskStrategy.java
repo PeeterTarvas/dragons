@@ -1,63 +1,74 @@
 package com.bigbank.dragons.strategy;
 
-import com.bigbank.dragons.client.dto.MessageDto;
-import com.bigbank.dragons.client.dto.ShopItemDto;
-import com.bigbank.dragons.game.ProbabilityEstimator;
+import com.bigbank.dragons.domain.Message;
+import com.bigbank.dragons.domain.ShopItem;
 import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.game.state.GameState;
+import com.bigbank.dragons.probability.ProbabilityEstimator;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "game.strategy", havingValue = "low-risk")
 public class LowRiskStrategy implements GameStrategy {
 
-    private final GameProperties properties;
+  private final GameProperties properties;
 
-    /**
-     * Sort first by highest success probability (lowest risk), then by highest reward
-     */
-    @Override
-    public Optional<MessageDto> chooseAd(
-            List<MessageDto> ads, GameState state, ProbabilityEstimator estimator) {
-        return ads.stream()
-                .max(Comparator.comparingDouble((MessageDto ad) -> estimator.estimate(ad.probability()))
-                        .thenComparingDouble(MessageDto::reward));
+  @Override
+  public StrategyType type() {
+    return StrategyType.LOW_RISK;
+  }
+
+  /** Sort first by highest success probability (lowest risk), then by highest reward */
+  @Override
+  public Message chooseAd(List<Message> ads, GameState state, ProbabilityEstimator estimator) {
+    return ads.stream()
+        .max(
+            Comparator.comparingDouble((Message ad) -> estimator.estimate(ad.probability()))
+                .thenComparingDouble(Message::reward))
+        .orElseThrow(() -> new IllegalStateException("No tasks available to choose from"));
+  }
+
+  /**
+   * Risk-averse shopping: heal eagerly (one threshold higher than the default), and only spend on
+   * upgrades while keeping a comfortable gold reserve. Healing is exempt from the reserve floor.
+   */
+  @Override
+  public List<ShopItem> choosePurchases(List<ShopItem> shopItems, GameState state) {
+    List<ShopItem> plan = new ArrayList<>();
+
+    if (state.getLives() <= properties.lowLivesThreshold() + 1) {
+      shopItems.stream()
+          .filter(i -> isHealingPotion(i.name()))
+          .filter(i -> i.cost() <= properties.healingPotionMaxCost())
+          .min(Comparator.comparingInt(ShopItem::cost))
+          .ifPresent(plan::add);
     }
 
-    /**
-     * Risk-averse: heal if missing ANY lives or if below the standard threshold.
-     * Only invest gold in upgrades if we have a significant financial cushion <= 300
-     */
-    @Override
-    public Optional<ShopItemDto> choosePurchase(List<ShopItemDto> shopItemDtos, GameState state) {
-        if (state.getLives() <= properties.lowLivesThreshold() + 1) {
-            Optional<ShopItemDto> potion =
-                    shopItemDtos.stream()
-                            .filter(i -> isHealingPotion(i.name()))
-                            .filter(i -> i.cost() <= state.getGold())
-                            .filter(i -> i.cost() <= properties.healingPotionMaxCost())
-                            .min(Comparator.comparingInt(ShopItemDto::cost));
-            if (potion.isPresent()) return potion;
-        }
+    // 2. Buy upgrades only while staying above the reserve. Cheapest-first = conservative spending.
+    int reserve = properties.goldReserve();
+    int projectedGold = state.getGold() - plan.stream().mapToInt(ShopItem::cost).sum();
 
-        if (state.getGold() >= 300) {
-            return shopItemDtos.stream()
-                    .filter(i -> !isHealingPotion(i.name()))
-                    .filter(i -> i.cost() <= state.getGold())
-                    .min(Comparator.comparingInt(ShopItemDto::cost));
-        }
+    List<ShopItem> upgrades =
+        shopItems.stream()
+            .filter(i -> !isHealingPotion(i.name()))
+            .sorted(Comparator.comparingInt(ShopItem::cost)) // cheapest first (risk-averse)
+            .toList();
 
-        return Optional.empty();
+    for (ShopItem item : upgrades) {
+      if (projectedGold - item.cost() >= reserve) {
+        plan.add(item);
+        projectedGold -= item.cost();
+      }
     }
+    return plan;
+  }
 
-    private static boolean isHealingPotion(String name) {
-        return name != null && name.toLowerCase(Locale.ROOT).contains("healing");
-    }
+  private static boolean isHealingPotion(String name) {
+    return name != null && name.toLowerCase(Locale.ROOT).contains("healing");
+  }
 }
