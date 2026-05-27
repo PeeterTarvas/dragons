@@ -5,6 +5,8 @@ import com.bigbank.dragons.domain.BuyResponse;
 import com.bigbank.dragons.domain.ShopItem;
 import com.bigbank.dragons.domain.SolveResponse;
 import com.bigbank.dragons.game.state.GameState;
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.List;
 
 public interface InteractiveGameService {
@@ -12,14 +14,14 @@ public interface InteractiveGameService {
   GameState startGame();
 
   /** Board without a strategy recommendation. */
-  Board getBoard(String gameId);
+  Board getBoard(@NotBlank String gameId);
 
   /** Board with the named strategy's recommended pick. */
-  Board getBoard(String gameId, String strategyKey);
+  Board getBoard(@NotBlank String gameId, @NotBlank String strategyKey);
 
-  SolveResponse solveAd(String gameId, String adId);
+  SolveResponse solveAd(@NotBlank String gameId, @NotBlank String adId);
 
-  List<ShopItem> getShop(String gameId);
+  List<ShopItem> getShop(@NotBlank String gameId);
 
-  BuyResponse buyItem(String gameId, String itemId);
+  BuyResponse buyItem(@NotBlank String gameId,@NotBlank String itemId);
 }

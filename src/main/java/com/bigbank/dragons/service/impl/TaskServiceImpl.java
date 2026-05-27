@@ -10,6 +10,7 @@ import com.bigbank.dragons.probability.ProbabilityEstimator;
 import com.bigbank.dragons.service.TaskService;
 import com.bigbank.dragons.strategy.GameStrategy;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,11 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public List<Message> getTasks(String gameId) {
-    return client.getMessages(gameId).stream().map(decoder::decode).map(mapper::toDomain).toList();
+    return client.getMessages(gameId).stream()
+        .map(mapper::toDomain)
+        .map(decoder::decode)
+        .filter(Objects::nonNull)
+        .toList();
   }
 
   @Override

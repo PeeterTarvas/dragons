@@ -53,8 +53,7 @@ public class ShopServiceImpl implements ShopService {
     state.addLog(
         new TurnLog(
             buy.turn(),
-            "BUY",
-            // item.name(),
+            String.format("BUY: %s", item.name()),
             null,
             buy.shoppingSuccess(),
             state.getScore(),

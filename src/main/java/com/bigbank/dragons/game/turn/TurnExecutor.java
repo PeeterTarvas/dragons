@@ -3,6 +3,7 @@ package com.bigbank.dragons.game.turn;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.domain.SolveResponse;
 import com.bigbank.dragons.domain.TurnLog;
+import com.bigbank.dragons.game.enums.Result;
 import com.bigbank.dragons.game.state.GameState;
 import com.bigbank.dragons.probability.ProbabilityEstimator;
 import com.bigbank.dragons.service.TaskService;
@@ -41,7 +42,7 @@ public class TurnExecutor {
         result.turn(),
         ad.message(),
         ad.probability(),
-        result.success() ? "WIN" : "LOSS",
+        result.success() ? Result.WIN : Result.LOSS,
         result.score(),
         result.lives());
 

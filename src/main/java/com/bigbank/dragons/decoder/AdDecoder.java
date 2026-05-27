@@ -1,6 +1,6 @@
 package com.bigbank.dragons.decoder;
 
-import com.bigbank.dragons.client.dto.MessageDto;
+import com.bigbank.dragons.domain.Message;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdDecoder {
 
-  public MessageDto decode(MessageDto ad) {
+  public Message decode(Message ad) {
     if (ad == null) {
       return null;
     }
     int encryptionType = Optional.ofNullable(ad.encrypted()).orElse(0);
     return switch (encryptionType) {
       case 1 ->
-          new MessageDto(
+          new Message(
               base64(ad.adId()),
               base64(ad.message()),
               ad.reward(),
@@ -24,7 +24,7 @@ public class AdDecoder {
               null,
               base64(ad.probability()));
       case 2 ->
-          new MessageDto(
+          new Message(
               rot13(ad.adId()),
               rot13(ad.message()),
               ad.reward(),
