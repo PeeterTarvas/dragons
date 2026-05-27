@@ -4,7 +4,7 @@ import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.game.state.GameState;
 import com.bigbank.dragons.strategy.StrategyType;
 
-public interface GameRunnerService {
+public interface AutomaticGameRunnerService {
 
   /** Play one full game to completion. */
   GameState playGame(StrategyType strategyType);

@@ -1,11 +1,11 @@
 package com.bigbank.dragons.service.impl;
 
 import com.bigbank.dragons.client.MugloarClient;
+import com.bigbank.dragons.client.mapper.ClientMapper;
 import com.bigbank.dragons.decoder.AdDecoder;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.domain.SolveResponse;
 import com.bigbank.dragons.game.state.GameState;
-import com.bigbank.dragons.mapper.GameMapper;
 import com.bigbank.dragons.probability.ProbabilityEstimator;
 import com.bigbank.dragons.service.TaskService;
 import com.bigbank.dragons.strategy.GameStrategy;
@@ -19,7 +19,7 @@ public class TaskServiceImpl implements TaskService {
 
   private final MugloarClient client;
   private final AdDecoder decoder;
-  private final GameMapper mapper;
+  private final ClientMapper mapper;
 
   @Override
   public List<Message> getTasks(String gameId) {

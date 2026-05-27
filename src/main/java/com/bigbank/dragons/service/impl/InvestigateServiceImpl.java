@@ -1,8 +1,8 @@
 package com.bigbank.dragons.service.impl;
 
 import com.bigbank.dragons.client.MugloarClient;
+import com.bigbank.dragons.client.mapper.ClientMapper;
 import com.bigbank.dragons.domain.Reputation;
-import com.bigbank.dragons.mapper.GameMapper;
 import com.bigbank.dragons.service.InvestigateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class InvestigateServiceImpl implements InvestigateService {
 
   private final MugloarClient mugloarClient;
-  private final GameMapper mapper;
+  private final ClientMapper mapper;
 
   @Override
   public Reputation investigate(String gameId) {

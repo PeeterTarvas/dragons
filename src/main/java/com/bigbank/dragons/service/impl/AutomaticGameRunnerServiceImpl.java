@@ -2,11 +2,9 @@ package com.bigbank.dragons.service.impl;
 
 import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.domain.Message;
-import com.bigbank.dragons.domain.SolveResponse;
-import com.bigbank.dragons.domain.TurnLog;
 import com.bigbank.dragons.game.config.GameProperties;
-import com.bigbank.dragons.game.enums.Result;
 import com.bigbank.dragons.game.state.GameState;
+import com.bigbank.dragons.game.turn.TurnExecutor;
 import com.bigbank.dragons.probability.ProbabilityEstimator;
 import com.bigbank.dragons.service.*;
 import com.bigbank.dragons.strategy.GameStrategy;
@@ -25,20 +23,20 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GameRunnerServiceImpl implements GameRunnerService {
+public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerService {
 
   private final GameService gameService;
   private final TaskService taskService;
   private final ShopService shopService;
   private final StatisticsService statisticsService;
   private final GameProperties props;
-  private final InvestigateService investigateService;
   private final StrategyRegistry strategyRegistry;
+  private final TurnExecutor turnExecutor;
 
   @Override
   public GameState playGame(StrategyType strategyType) {
     GameStrategy strategy = strategyRegistry.resolve(strategyType);
-    GameState state = gameService.start(); // may throw -> propagates, not counted
+    GameState state = gameService.start();
     ProbabilityEstimator estimator = new ProbabilityEstimator();
     log.info(
         "Started game {} (lives={}, gold={})",
@@ -48,36 +46,14 @@ public class GameRunnerServiceImpl implements GameRunnerService {
 
     try {
       while (state.isAlive() && state.getTurn() < props.maxTurns()) {
-
         List<Message> ads = taskService.getTasks(state.getGameId());
         Message ad = taskService.chooseTask(ads, state, estimator, strategy);
-        SolveResponse result = taskService.solve(state, ad);
 
-        // double = investigateService.calculateScore(state.getGameId());
-        state.update(result.lives(), result.gold(), result.score(), result.turn());
-        estimator.record(ad.probability(), result.success());
+        turnExecutor.execute(state, ad, estimator);
 
         if (state.isAlive()) {
           shopService.shop(state, strategy);
         }
-
-        log.info(
-            "Turn {}: '{}' [{}] -> {} (score={}, lives={})",
-            result.turn(),
-            ad.message(),
-            ad.probability(),
-            result.success() ? Result.WIN : Result.LOSS,
-            result.score(),
-            result.lives());
-        state.addLog(
-            new TurnLog(
-                result.turn(),
-                ad.message(),
-                ad.probability(),
-                result.success(),
-                result.score(),
-                result.lives(),
-                result.gold()));
       }
 
       state.markReachedGoal(state.getScore() >= props.targetScore());

@@ -1,8 +1,8 @@
 package com.bigbank.dragons.service.impl;
 
 import com.bigbank.dragons.client.MugloarClient;
+import com.bigbank.dragons.client.mapper.GameStateMapper;
 import com.bigbank.dragons.game.state.GameState;
-import com.bigbank.dragons.mapper.GameStateMapper;
 import com.bigbank.dragons.service.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

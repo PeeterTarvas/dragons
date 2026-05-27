@@ -1,0 +1,59 @@
+package com.bigbank.dragons.api;
+
+import com.bigbank.dragons.api.dto.BoardDto;
+import com.bigbank.dragons.api.dto.GameStateDto;
+import com.bigbank.dragons.api.dto.ShopItemDto;
+import com.bigbank.dragons.api.dto.SolveResponseDto;
+import com.bigbank.dragons.api.mapper.ApiMapper;
+import com.bigbank.dragons.domain.Board;
+import com.bigbank.dragons.service.InteractiveGameService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/games")
+@Validated
+@Tag(name = "Interactive Game", description = "Turn-by-turn interactive play")
+@RequiredArgsConstructor
+public class InteractiveGameController {
+
+  private final InteractiveGameService service;
+  private final ApiMapper apiMapper;
+
+  @GetMapping("/play")
+  public GameStateDto start() {
+    return apiMapper.toDto(service.startGame());
+  }
+
+  @GetMapping("/{gameId}/board")
+  public BoardDto board(
+      @PathVariable @NotBlank String gameId, @RequestParam Optional<String> strategy) {
+    Board board =
+        strategy
+            .map(strat -> service.getBoard(gameId, strat))
+            .orElseGet(() -> service.getBoard(gameId));
+    return apiMapper.toDto(board);
+  }
+
+  @PostMapping("/{gameId}/solve/{adId}")
+  public SolveResponseDto solve(
+      @PathVariable @NotBlank String gameId, @PathVariable @NotBlank String adId) {
+    return apiMapper.toDto(service.solveAd(gameId, adId));
+  }
+
+  @GetMapping("/{gameId}/shop")
+  public List<ShopItemDto> shop(@PathVariable @NotBlank String gameId) {
+    return apiMapper.toListDto(service.getShop(gameId));
+  }
+
+  @PostMapping("/{gameId}/buy/{itemId}")
+  public GameStateDto buy(
+      @PathVariable @NotBlank String gameId, @PathVariable @NotBlank String itemId) {
+    return apiMapper.toDto(service.buyItem(gameId, itemId));
+  }
+}

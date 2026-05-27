@@ -1,10 +1,12 @@
-package com.bigbank.dragons.strategy;
+package com.bigbank.dragons.strategy.impl;
 
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.domain.ShopItem;
 import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.game.state.GameState;
 import com.bigbank.dragons.probability.ProbabilityEstimator;
+import com.bigbank.dragons.strategy.GameStrategy;
+import com.bigbank.dragons.strategy.StrategyType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

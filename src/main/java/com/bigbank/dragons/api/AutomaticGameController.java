@@ -2,9 +2,9 @@ package com.bigbank.dragons.api;
 
 import com.bigbank.dragons.api.dto.BatchStatsDto;
 import com.bigbank.dragons.api.dto.GameResultDto;
-import com.bigbank.dragons.mapper.GameMapper;
-import com.bigbank.dragons.mapper.GameResultMapper;
-import com.bigbank.dragons.service.GameRunnerService;
+import com.bigbank.dragons.api.mapper.ApiMapper;
+import com.bigbank.dragons.api.mapper.GameResultMapper;
+import com.bigbank.dragons.service.AutomaticGameRunnerService;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,25 +22,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 @Tag(name = "Game", description = "Operations for managing game")
 @RequiredArgsConstructor
-public class GameController {
+public class AutomaticGameController {
 
-  private final GameRunnerService gameRunnerService;
+  private final AutomaticGameRunnerService automaticGameRunnerService;
   private final GameResultMapper gameResultMapper;
-  private final GameMapper gameMapper;
+  private final ApiMapper apiMapper;
   private final StrategyRegistry strategyRegistry;
 
   @PostMapping("/play")
   public GameResultDto play(@RequestParam(required = false) String strategy) {
     StrategyType type = StrategyType.fromKey(strategy).orElse(StrategyType.EXPECTED_VALUE);
-    return gameResultMapper.toDto(gameRunnerService.playGame(type));
+    return gameResultMapper.toDto(automaticGameRunnerService.playGame(type));
   }
 
   @PostMapping("/play/batch")
   public BatchStatsDto playBatch(
-      @RequestParam(defaultValue = "50") @Min(1) @Max(500) int games,
+      @RequestParam(defaultValue = "3") @Min(1) @Max(500) int games,
       @RequestParam(required = false) String strategy) {
     StrategyType type = StrategyType.fromKey(strategy).orElse(StrategyType.EXPECTED_VALUE);
-    return gameMapper.toDto(gameRunnerService.playBatch(games, type));
+    return apiMapper.toDto(automaticGameRunnerService.playBatch(games, type));
   }
 
   @GetMapping("/strategies")

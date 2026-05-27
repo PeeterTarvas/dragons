@@ -1,4 +1,4 @@
-package com.bigbank.dragons.mapper;
+package com.bigbank.dragons.client.mapper;
 
 import com.bigbank.dragons.client.dto.StartGameResponseDto;
 import com.bigbank.dragons.game.state.GameState;

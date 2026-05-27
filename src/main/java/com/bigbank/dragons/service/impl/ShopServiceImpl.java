@@ -1,11 +1,11 @@
 package com.bigbank.dragons.service.impl;
 
 import com.bigbank.dragons.client.MugloarClient;
+import com.bigbank.dragons.client.mapper.ClientMapper;
 import com.bigbank.dragons.domain.BuyResponse;
 import com.bigbank.dragons.domain.ShopItem;
 import com.bigbank.dragons.domain.TurnLog;
 import com.bigbank.dragons.game.state.GameState;
-import com.bigbank.dragons.mapper.GameMapper;
 import com.bigbank.dragons.service.ShopService;
 import com.bigbank.dragons.strategy.GameStrategy;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class ShopServiceImpl implements ShopService {
 
   private final MugloarClient client;
-  private final GameMapper mapper;
+  private final ClientMapper mapper;
 
   @Override
   public List<ShopItem> shop(GameState state, GameStrategy strategy) {

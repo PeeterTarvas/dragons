@@ -1,5 +1,6 @@
 package com.bigbank.dragons.api.handler;
 
+import com.bigbank.dragons.api.exception.InvalidStrategyException;
 import com.bigbank.dragons.client.exception.MugloarApiException;
 import java.time.Instant;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,13 @@ public class GlobalExceptionHandler {
             HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
     pd.setTitle("Internal error");
     pd.setProperty("timestamp", Instant.now());
+    return pd;
+  }
+
+  @ExceptionHandler(InvalidStrategyException.class)
+  public ProblemDetail handleInvalidStrategy(InvalidStrategyException ex) {
+    ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    pd.setTitle("Invalid strategy");
     return pd;
   }
 }
