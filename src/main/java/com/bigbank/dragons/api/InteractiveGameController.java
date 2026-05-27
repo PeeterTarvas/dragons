@@ -1,9 +1,6 @@
 package com.bigbank.dragons.api;
 
-import com.bigbank.dragons.api.dto.BoardDto;
-import com.bigbank.dragons.api.dto.GameStateDto;
-import com.bigbank.dragons.api.dto.ShopItemDto;
-import com.bigbank.dragons.api.dto.SolveResponseDto;
+import com.bigbank.dragons.api.dto.*;
 import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.Board;
 import com.bigbank.dragons.service.InteractiveGameService;
@@ -27,7 +24,7 @@ public class InteractiveGameController {
 
   @GetMapping("/play")
   public GameStateDto start() {
-    return apiMapper.toDto(service.startGame());
+    return apiMapper.toGameStateDto(service.startGame());
   }
 
   @GetMapping("/{gameId}/board")
@@ -52,7 +49,7 @@ public class InteractiveGameController {
   }
 
   @PostMapping("/{gameId}/buy/{itemId}")
-  public GameStateDto buy(
+  public BuyResponseDto buy(
       @PathVariable @NotBlank String gameId, @PathVariable @NotBlank String itemId) {
     return apiMapper.toDto(service.buyItem(gameId, itemId));
   }

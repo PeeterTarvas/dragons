@@ -1,6 +1,5 @@
 package com.bigbank.dragons.strategy;
 
-import com.bigbank.dragons.api.exception.InvalidStrategyException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +19,7 @@ public class StrategyRegistry {
 
   public GameStrategy resolve(StrategyType type) {
     return Optional.ofNullable(byType.get(type))
-        .orElseThrow(
-            () -> new InvalidStrategyException("Unknown or unsupported strategy: " + type));
+        .orElseGet(() -> byType.get(StrategyType.EXPECTED_VALUE));
   }
 
   public List<StrategyType> available() {

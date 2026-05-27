@@ -10,6 +10,7 @@ import com.bigbank.dragons.service.*;
 import com.bigbank.dragons.strategy.GameStrategy;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
+import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -70,7 +71,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
   }
 
   @Override
-  public BatchStats playBatch(int games, StrategyType strategyType) {
+  public BatchStats playBatch(@NotBlank int games, StrategyType strategyType) {
     statisticsService.reset();
     ExecutorService pool = Executors.newFixedThreadPool(props.threadPoolSize());
     try {

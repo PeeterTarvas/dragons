@@ -3,7 +3,6 @@ package com.bigbank.dragons.api;
 import com.bigbank.dragons.api.dto.BatchStatsDto;
 import com.bigbank.dragons.api.dto.GameResultDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
-import com.bigbank.dragons.api.mapper.GameResultMapper;
 import com.bigbank.dragons.service.AutomaticGameRunnerService;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
@@ -25,14 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AutomaticGameController {
 
   private final AutomaticGameRunnerService automaticGameRunnerService;
-  private final GameResultMapper gameResultMapper;
   private final ApiMapper apiMapper;
   private final StrategyRegistry strategyRegistry;
 
   @PostMapping("/play")
   public GameResultDto play(@RequestParam(required = false) String strategy) {
     StrategyType type = StrategyType.fromKey(strategy).orElse(StrategyType.EXPECTED_VALUE);
-    return gameResultMapper.toDto(automaticGameRunnerService.playGame(type));
+    return apiMapper.toGameResultDto(automaticGameRunnerService.playGame(type));
   }
 
   @PostMapping("/play/batch")

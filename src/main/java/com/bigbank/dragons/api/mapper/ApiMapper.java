@@ -14,7 +14,7 @@ public interface ApiMapper {
 
   TurnLogDto toDto(TurnLog domain);
 
-  GameStateDto toDto(GameState gameState);
+  GameStateDto toGameStateDto(GameState gameState);
 
   SolveResponseDto toDto(SolveResponse solveResponse);
 
@@ -29,4 +29,9 @@ public interface ApiMapper {
   @Mapping(source = "message.expiresIn", target = "expiresIn")
   @Mapping(source = "message.probability", target = "probability")
   AdDto toAdDto(EvaluatedMessage domain);
+
+  @Mapping(source = ".", target = "gameStateDto")
+  GameResultDto toGameResultDto(GameState gameState);
+
+  BuyResponseDto toDto(BuyResponse buyResponse);
 }

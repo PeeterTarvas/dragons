@@ -1,6 +1,7 @@
 package com.bigbank.dragons.service;
 
 import com.bigbank.dragons.domain.Board;
+import com.bigbank.dragons.domain.BuyResponse;
 import com.bigbank.dragons.domain.ShopItem;
 import com.bigbank.dragons.domain.SolveResponse;
 import com.bigbank.dragons.game.state.GameState;
@@ -20,5 +21,5 @@ public interface InteractiveGameService {
 
   List<ShopItem> getShop(String gameId);
 
-  GameState buyItem(String gameId, String itemId);
+  BuyResponse buyItem(String gameId, String itemId);
 }

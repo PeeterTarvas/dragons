@@ -30,7 +30,7 @@ public class LowRiskStrategy implements GameStrategy {
   public Message chooseAd(List<Message> ads, GameState state, ProbabilityEstimator estimator) {
     return ads.stream()
         .max(
-            Comparator.comparingDouble((Message ad) -> estimator.estimate(ad.probability()))
+            Comparator.comparingDouble((Message ad) -> estimator.estimate(ad))
                 .thenComparingDouble(Message::reward))
         .orElseThrow(() -> new IllegalStateException("No tasks available to choose from"));
   }

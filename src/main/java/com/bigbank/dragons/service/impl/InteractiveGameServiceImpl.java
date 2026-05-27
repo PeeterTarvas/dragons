@@ -12,18 +12,22 @@ import com.bigbank.dragons.game.turn.TurnExecutor;
 import com.bigbank.dragons.service.GameService;
 import com.bigbank.dragons.service.InteractiveGameService;
 import com.bigbank.dragons.service.TaskService;
+import com.bigbank.dragons.service.validation.GameActionValidator;
 import com.bigbank.dragons.strategy.GameStrategy;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
+import jakarta.validation.constraints.NotBlank;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Service
+@Validated
 @RequiredArgsConstructor
 public class InteractiveGameServiceImpl implements InteractiveGameService {
 
@@ -35,6 +39,7 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
   private final StrategyRegistry strategyRegistry;
   private final GameProperties props;
   private final TurnExecutor turnExecutor;
+  private final GameActionValidator validator;
 
   @Override
   public GameState startGame() {
@@ -45,12 +50,12 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
   }
 
   @Override
-  public Board getBoard(String gameId) {
+  public Board getBoard(@NotBlank String gameId) {
     return buildBoard(gameId, Optional.empty());
   }
 
   @Override
-  public Board getBoard(String gameId, String strategyKey) {
+  public Board getBoard(@NotBlank String gameId, @NotBlank String strategyKey) {
     StrategyType type =
         StrategyType.fromKey(strategyKey)
             .orElseThrow(() -> new InvalidStrategyException("Unknown strategy: " + strategyKey));
@@ -58,11 +63,12 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
     return buildBoard(gameId, Optional.of(strategyRegistry.resolve(type)));
   }
 
-  private Board buildBoard(String gameId, Optional<GameStrategy> strategyOpt) {
+  private Board buildBoard(@NotBlank String gameId, Optional<GameStrategy> strategyOpt) {
     GameSession session = sessionStore.get(gameId);
+    validator.validateGameIsActive(session);
+
     List<Message> messages = taskService.getTasks(gameId);
     session.setLastBoard(messages);
-
     String recommendedAdId =
         strategyOpt
             .filter(_ -> !messages.isEmpty())
@@ -73,7 +79,7 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
 
     List<EvaluatedMessage> evaluated =
         messages.stream()
-            .map(m -> new EvaluatedMessage(m, session.getEstimator().estimate(m.probability())))
+            .map(message -> new EvaluatedMessage(message, session.getEstimator().estimate(message)))
             .sorted(Comparator.comparing(EvaluatedMessage::estimatedSuccess).reversed())
             .toList();
 
@@ -81,9 +87,10 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
   }
 
   @Override
-  public SolveResponse solveAd(String gameId, String adId) {
+  public SolveResponse solveAd(@NotBlank String gameId, @NotBlank String adId) {
     GameSession session = sessionStore.get(gameId);
-    Message ad = findAdOnBoard(session, adId);
+    validator.validateGameIsActive(session);
+    Message ad = validator.validateAndGetAd(session, adId);
 
     SolveResponse result = turnExecutor.execute(session.getState(), ad, session.getEstimator());
 
@@ -95,28 +102,22 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
   }
 
   @Override
-  public List<ShopItem> getShop(String gameId) {
-    sessionStore.get(gameId);
+  public List<ShopItem> getShop(@NotBlank String gameId) {
+    GameSession session = sessionStore.get(gameId);
+    validator.validateGameIsActive(session);
+
     return client.getShop(gameId).stream()
         .map(i -> new ShopItem(i.id(), i.name(), i.cost()))
         .toList();
   }
 
   @Override
-  public GameState buyItem(String gameId, String itemId) {
+  public BuyResponse buyItem(@NotBlank String gameId, @NotBlank String itemId) {
     GameSession session = sessionStore.get(gameId);
+    validator.validateGameIsActive(session);
+
     BuyResponse buy = clientMapper.toDomain(client.buy(gameId, itemId));
     session.getState().updateAfterBuy(buy);
-    return session.getState();
-  }
-
-  private static Message findAdOnBoard(GameSession session, String adId) {
-    return session.getLastBoard().stream()
-        .filter(m -> m.adId().equals(adId))
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    "Ad " + adId + " is not on the current board for this game"));
+    return buy;
   }
 }

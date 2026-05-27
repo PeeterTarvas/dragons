@@ -5,6 +5,7 @@ import com.bigbank.dragons.game.state.GameState;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,11 @@ public class GameSessionStore {
   }
 
   public GameSession get(String gameId) {
-    GameSession session = sessions.get(gameId);
-    if (session == null) {
+    Optional<GameSession> sessionOpt = Optional.ofNullable(sessions.get(gameId));
+    if (sessionOpt.isEmpty()) {
       throw new GameNotFoundException("No active game with id: " + gameId);
     }
+    GameSession session = sessionOpt.get();
     session.touch();
     return session;
   }

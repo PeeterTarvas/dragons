@@ -33,7 +33,7 @@ public class ExpectedValueStrategy implements GameStrategy {
   }
 
   private double expectedValue(Message ad, ProbabilityEstimator estimator) {
-    return ad.reward() * estimator.estimate(ad.probability());
+    return ad.reward() * estimator.estimate(ad);
   }
 
   @Override
