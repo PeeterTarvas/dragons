@@ -30,9 +30,9 @@ public class InteractiveGameController {
 
   @GetMapping("/{gameId}/board")
   public BoardDto board(
-      @PathVariable @NotBlank String gameId, @RequestParam Optional<String> strategy) {
+      @PathVariable @NotBlank String gameId, @RequestParam(required = false) String strategy) {
     Board board =
-        strategy
+        Optional.ofNullable(strategy)
             .map(strat -> service.getBoard(gameId, strat))
             .orElseGet(() -> service.getBoard(gameId));
     return apiMapper.toDto(board);

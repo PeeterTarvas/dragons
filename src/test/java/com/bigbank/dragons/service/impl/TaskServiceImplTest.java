@@ -106,4 +106,30 @@ class TaskServiceImplTest {
 
     assertEquals(expectedResponse, actualResponse);
   }
+
+  @Test
+  void chooseTaskValidInputsDecodesAdsAndDelegatesToStrategy() {
+    GameState state = mock(GameState.class);
+    ProbabilityEstimator estimator = mock(ProbabilityEstimator.class);
+    GameStrategy strategy = mock(GameStrategy.class);
+
+    Message rawAd1 = mock(Message.class);
+    Message rawAd2 = mock(Message.class);
+    Message decodedAd1 = mock(Message.class);
+
+    List<Message> rawAds = List.of(rawAd1, rawAd2);
+
+    when(decoder.decode(rawAd1)).thenReturn(Optional.of(decodedAd1));
+    when(decoder.decode(rawAd2)).thenReturn(Optional.empty());
+
+    Message expectedChosenAd = mock(Message.class);
+    when(strategy.chooseAd(List.of(decodedAd1), state, estimator)).thenReturn(expectedChosenAd);
+
+    Message result = taskService.chooseTask(rawAds, state, estimator, strategy);
+
+    assertEquals(expectedChosenAd, result);
+    verify(domainValidator).validate(state);
+    verify(decoder).decode(rawAd1);
+    verify(decoder).decode(rawAd2);
+  }
 }

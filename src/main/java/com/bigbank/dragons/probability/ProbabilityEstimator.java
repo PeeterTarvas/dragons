@@ -2,6 +2,7 @@ package com.bigbank.dragons.probability;
 
 import com.bigbank.dragons.domain.Message;
 import java.util.EnumMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class ProbabilityEstimator {
@@ -10,9 +11,8 @@ public class ProbabilityEstimator {
 
   private final Map<Probability, int[]> stats = new EnumMap<>(Probability.class);
 
-  /** * NEW METHOD: Estimate probability from the full message, catching known traps. */
   public double estimate(Message message) {
-    String text = message.message().toLowerCase();
+    String text = message.message().toLowerCase(Locale.ROOT);
     if (text.contains("steal") && text.contains("diamond")) {
       return 0.0;
     }

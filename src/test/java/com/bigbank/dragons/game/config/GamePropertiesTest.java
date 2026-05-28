@@ -17,8 +17,8 @@ public class GamePropertiesTest {
     assertEquals("expected-value", props.strategy());
     assertEquals(0.2, props.probabilityFloor());
     assertEquals(2, props.lowLivesThreshold());
-    assertEquals(200, props.healingPotionMaxCost());
-    assertEquals(0, props.goldReserve());
+    assertEquals(50, props.healingPotionMaxCost());
+    assertEquals(200, props.goldReserve());
   }
 
   @Test
