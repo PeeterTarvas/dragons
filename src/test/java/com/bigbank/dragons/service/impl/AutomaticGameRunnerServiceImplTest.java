@@ -1,7 +1,19 @@
 package com.bigbank.dragons.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.domain.Message;
@@ -15,6 +27,7 @@ import com.bigbank.dragons.service.TaskService;
 import com.bigbank.dragons.strategy.GameStrategy;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -122,7 +135,7 @@ class AutomaticGameRunnerServiceImplTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void playBatchHandlesFutureResultsAndCollectsScores() throws Exception {
+  void playBatchHandlesFutureResultsAndCollectsScores() {
     BatchStats mockStats = mock(BatchStats.class);
     when(statisticsService.snapshot(any())).thenReturn(mockStats);
 
@@ -147,7 +160,7 @@ class AutomaticGameRunnerServiceImplTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void playGameSafely_ReturnsNullWhenGameStartFails() throws Exception {
+  void playGameSafelyReturnsNullWhenGameStartFails() throws Exception {
     when(batchExecutorService.submit(callableCaptor.capture())).thenReturn(mock(Future.class));
     runnerService.playBatch(1, StrategyType.EXPECTED_VALUE);
 
@@ -179,5 +192,31 @@ class AutomaticGameRunnerServiceImplTest {
     GameState result = playGameSafelyCallable.call();
 
     assertEquals(state, result);
+  }
+
+  @Test
+  void playBatchWithZeroGamesReturnsEmptyStats() {
+    BatchStats empty = new BatchStats(0, 0.0, 0.0, 0.0, 0L, 0.0);
+    when(statisticsService.snapshot(argThat(Collection::isEmpty))).thenReturn(empty);
+
+    BatchStats result = runnerService.playBatch(0, StrategyType.EXPECTED_VALUE);
+
+    assertEquals(0, result.games());
+    verifyNoInteractions(gameService);
+  }
+
+  @Test
+  void playGameMarksGoalNotReachedWhenScoreBelowTarget() {
+    when(strategyRegistry.resolve(StrategyType.EXPECTED_VALUE)).thenReturn(strategy);
+    when(gameService.start()).thenReturn(state);
+
+    when(state.isAlive()).thenReturn(false);
+
+    when(state.getScore()).thenReturn(500.0);
+    when(props.targetScore()).thenReturn(1000.0);
+
+    runnerService.playGame(StrategyType.EXPECTED_VALUE);
+
+    verify(state).markReachedGoal(false);
   }
 }

@@ -1,7 +1,16 @@
 package com.bigbank.dragons.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.client.MugloarClient;
 import com.bigbank.dragons.client.dto.BuyResponseDto;
@@ -77,5 +86,28 @@ public class ShopServiceImplTest {
 
     assertFalse(result.shoppingSuccess());
     verify(state).addLog(any());
+  }
+
+  @Test
+  void buyItemLogsSuccessWhenPurchaseSucceeds() {
+    GameState state = mock(GameState.class);
+    BuyResponseDto buyDto = mock(BuyResponseDto.class);
+    ShopItem shopItem = new ShopItem("item-1", "item-1", 1);
+    BuyResponse success = new BuyResponse(true, 150, 3, 5, 100);
+    when(client.buy(state.getGameId(), shopItem.id())).thenReturn(buyDto);
+    when(mapper.toDomain(buyDto)).thenReturn(success);
+
+    BuyResponse result = shopService.buyItem(state, shopItem);
+
+    assertTrue(result.shoppingSuccess());
+    verify(state).updateAfterBuy(success);
+  }
+
+  @Test
+  void buyItemThrowsWhenStateIsInvalid() {
+    GameState state = mock(GameState.class);
+    ShopItem shopItem = new ShopItem("item-1", "item-1", 1);
+    doThrow(new IllegalArgumentException("invalid")).when(domainValidator).validate(state);
+    assertThrows(IllegalArgumentException.class, () -> shopService.buyItem(state, shopItem));
   }
 }

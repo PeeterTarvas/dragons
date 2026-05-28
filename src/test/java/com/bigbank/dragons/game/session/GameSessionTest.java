@@ -1,6 +1,7 @@
 package com.bigbank.dragons.game.session;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.game.state.GameState;
@@ -29,5 +30,25 @@ public class GameSessionTest {
     assertEquals(1, session.getAvailableMessages().size());
     assertTrue(session.getAvailableMessages().contains(mockMessage));
     assertFalse(session.getLastAccess().isBefore(beforeUpdate));
+  }
+
+  @Test
+  void constructorInitialisesFieldsCorrectly() {
+    GameState state = mock(GameState.class);
+    GameSession session = new GameSession(state);
+
+    assertSame(state, session.getState());
+    assertNotNull(session.getEstimator());
+    assertNotNull(session.getLastAccess());
+    assertTrue(session.getAvailableMessages().isEmpty());
+  }
+
+  @Test
+  void touchAdvancesLastAccess() throws InterruptedException {
+    GameSession session = new GameSession(mock(GameState.class));
+    Instant before = session.getLastAccess();
+    Thread.sleep(5);
+    session.touch();
+    assertTrue(session.getLastAccess().isAfter(before));
   }
 }

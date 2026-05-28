@@ -53,4 +53,21 @@ class GameStateTest {
     assertEquals(1, state.getLog().size());
     assertEquals(mockLog, state.getLog().get(0));
   }
+
+  @Test
+  void updateStoresAllFields() {
+    GameState state = new GameState("g1", 3, 100, 1, 0, 1, false);
+    state.update(1, 250, 500.0, 7);
+    assertEquals(1, state.getLives());
+    assertEquals(250, state.getGold());
+    assertEquals(500.0, state.getScore());
+    assertEquals(7, state.getTurn());
+  }
+
+  @Test
+  void markReachedGoalFalseStoresFalse() {
+    GameState state = new GameState("g1", 3, 100, 1, 0, 1, true);
+    state.markReachedGoal(false);
+    assertFalse(state.isReachedGoal());
+  }
 }

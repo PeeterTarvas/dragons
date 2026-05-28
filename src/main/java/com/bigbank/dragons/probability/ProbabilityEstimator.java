@@ -13,7 +13,7 @@ public class ProbabilityEstimator {
 
   public double estimate(Message message) {
     String text = message.message().toLowerCase(Locale.ROOT);
-    if (text.contains("steal") && text.contains("diamond")) {
+    if (text.contains("steal") && text.contains("diamond")) { // TODO: make this better
       return 0.0;
     }
     return estimate(message.probability());

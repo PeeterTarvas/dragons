@@ -77,7 +77,6 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
     return stats;
   }
 
-  /** Wraps the game execution to catch errors, returning the partial state if interrupted. */
   private GameState playGameSafely(StrategyType strategyType) {
     GameState state = null;
     try {

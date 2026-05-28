@@ -5,6 +5,6 @@ public record SolveResponse(
     Integer lives,
     Integer gold,
     Double score,
-    Integer highScore,
+    Double highScore,
     Integer turn,
     String message) {}

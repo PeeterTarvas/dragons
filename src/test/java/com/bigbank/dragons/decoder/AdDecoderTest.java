@@ -1,8 +1,6 @@
 package com.bigbank.dragons.decoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.bigbank.dragons.domain.Message;
 import java.util.Base64;
@@ -77,5 +75,11 @@ public class AdDecoderTest {
     assertEquals(250, decoded.reward());
     assertEquals(7, decoded.expiresIn());
     assertNull(decoded.encrypted());
+  }
+
+  @Test
+  void decodeThrowsWhenBase64IsInvalid() {
+    Message broken = new Message("not!!base64", "also!!not", 100, 5, 1, "bad");
+    assertThrows(IllegalArgumentException.class, () -> decoder.decode(broken));
   }
 }

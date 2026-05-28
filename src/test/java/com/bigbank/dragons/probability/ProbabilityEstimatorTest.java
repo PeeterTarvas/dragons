@@ -1,6 +1,7 @@
 package com.bigbank.dragons.probability;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.bigbank.dragons.domain.Message;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,5 +75,15 @@ public class ProbabilityEstimatorTest {
     Message message = new Message("1", "Task", 100, 10, null, Probability.UNKNOWN.label());
 
     assertEquals(0.475, estimator.estimate(message), 0.001);
+  }
+
+  @Test
+  void recordAccumulatesSuccessesAndFailuresAcrossMultipleCalls() {
+    estimator.record(Probability.HMMM.label(), true);
+    estimator.record(Probability.HMMM.label(), false);
+    Message message = new Message("1", "Something hmm", 100, 10, null, Probability.HMMM.label());
+
+    double estimate = estimator.estimate(message);
+    assertTrue(estimate > 0.0 && estimate < 1.0);
   }
 }

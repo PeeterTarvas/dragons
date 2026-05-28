@@ -46,4 +46,11 @@ public class StatisticsServiceImplTest {
     assertEquals(2, stats.gamesReachedTarget());
     assertEquals(66.66666666666667, stats.reachedTargetPercent());
   }
+
+  @Test
+  void snapshotCountsScoreExactlyAtTargetAsReached() {
+    BatchStats stats = statisticsService.snapshot(List.of(1000.0));
+    assertEquals(1, stats.gamesReachedTarget());
+    assertEquals(100.0, stats.reachedTargetPercent());
+  }
 }

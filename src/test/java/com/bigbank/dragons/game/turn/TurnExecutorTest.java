@@ -1,7 +1,7 @@
 package com.bigbank.dragons.game.turn;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +31,7 @@ public class TurnExecutorTest {
     GameState state = mock(GameState.class);
     Message ad = new Message("ad-1", "Solve this", 100, 5, null, Probability.SURE_THING.label());
     SolveResponse solveResponse =
-        new SolveResponse(true, 3, 100, 50.0, 1, 1, "You successfully solved the mission!");
+        new SolveResponse(true, 3, 100, 50.0, 50.0, 1, "You successfully solved the mission!");
 
     when(taskService.solve(state, ad)).thenReturn(solveResponse);
 
@@ -42,5 +42,18 @@ public class TurnExecutorTest {
     verify(state).update(3, 100, 50, 1);
     verify(estimator).record(Probability.SURE_THING.label(), true);
     verify(state).addLog(any());
+  }
+
+  @Test
+  void executeRecordsLossWhenSolveResponseIndicatesFailure() {
+    GameState state = mock(GameState.class);
+    Message ad = new Message("ad-1", "Solve this", 100, 5, null, Probability.SURE_THING.label());
+
+    SolveResponse loss = new SolveResponse(false, 2, 80, 200.0, 200.0, 20, "You failed");
+    when(taskService.solve(state, ad)).thenReturn(loss);
+
+    turnExecutor.execute(state, ad, estimator);
+
+    verify(state).update(eq(2), eq(80), eq(200.0), anyInt());
   }
 }
