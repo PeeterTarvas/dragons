@@ -10,6 +10,7 @@ import com.bigbank.dragons.service.*;
 import com.bigbank.dragons.strategy.GameStrategy;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
 @Service
@@ -75,6 +77,55 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
     BatchStats stats = statisticsService.snapshot(scores);
     log.info("Batch finished: {}", stats);
     return stats;
+  }
+
+  @Override
+  public void playGameStreaming(StrategyType strategyType, SseEmitter emitter) {
+    // TODO: Not sure if this should send state or a DTO
+    try {
+      GameState state = gameService.start();
+      GameStrategy strategy = strategyRegistry.resolve(strategyType);
+      ProbabilityEstimator estimator = new ProbabilityEstimator();
+
+      log.info(
+          "Started streaming game {} (lives={}, gold={})",
+          state.getGameId(),
+          state.getLives(),
+          state.getGold());
+
+      sendState(emitter, state);
+
+      while (state.isAlive() && state.getTurn() < props.maxTurns()) {
+        List<Message> ads = taskService.getTasks(state.getGameId());
+        Message ad = taskService.chooseTask(ads, state, estimator, strategy);
+        turnExecutor.execute(state, ad, estimator);
+        if (state.isAlive()) {
+          shopService.shop(state, strategy);
+        }
+        sendState(emitter, state);
+        Thread.sleep(100);
+      }
+
+      state.markReachedGoal(state.getScore() >= props.targetScore());
+      log.info(
+          "Streaming Game {} finished: score={}, turns={}, reached={}",
+          state.getGameId(),
+          state.getScore(),
+          state.getTurn(),
+          state.isReachedGoal());
+
+      sendState(emitter, state);
+
+      emitter.complete();
+
+    } catch (Exception e) {
+      log.error("Streaming game interrupted/failed: {}", e.getMessage());
+      emitter.completeWithError(e);
+    }
+  }
+
+  private void sendState(SseEmitter emitter, GameState state) throws IOException {
+    emitter.send(SseEmitter.event().name("turn").data(state));
   }
 
   private GameState playGameSafely(StrategyType strategyType) {

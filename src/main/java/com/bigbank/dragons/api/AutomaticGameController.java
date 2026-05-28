@@ -10,12 +10,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api")
@@ -26,6 +29,7 @@ public class AutomaticGameController {
   private final AutomaticGameRunnerService automaticGameRunnerService;
   private final ApiMapper apiMapper;
   private final StrategyRegistry strategyRegistry;
+  private final ExecutorService batchExecutorService;
 
   @PostMapping("/play")
   public GameResultDto play(@RequestParam(required = false) String strategy) {
@@ -44,5 +48,13 @@ public class AutomaticGameController {
   @GetMapping("/strategies")
   public List<String> strategies() {
     return strategyRegistry.available().stream().map(StrategyType::key).toList();
+  }
+
+  @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public SseEmitter streamGame(@RequestParam(required = false) String strategy) {
+    SseEmitter emitter = new SseEmitter(120_000L);
+    StrategyType type = StrategyType.fromKey(strategy).orElse(StrategyType.EXPECTED_VALUE);
+    batchExecutorService.submit(() -> automaticGameRunnerService.playGameStreaming(type, emitter));
+    return emitter;
   }
 }
