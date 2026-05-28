@@ -37,38 +37,19 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
 
   @Override
   public GameState playGame(StrategyType strategyType) {
-    GameStrategy strategy = strategyRegistry.resolve(strategyType);
     GameState state = gameService.start();
+    GameStrategy strategy = strategyRegistry.resolve(strategyType);
     ProbabilityEstimator estimator = new ProbabilityEstimator();
+
     log.info(
         "Started game {} (lives={}, gold={})",
         state.getGameId(),
         state.getLives(),
         state.getGold());
 
-    try {
-      while (state.isAlive() && state.getTurn() < props.maxTurns()) {
-        List<Message> ads = taskService.getTasks(state.getGameId());
-        Message ad = taskService.chooseTask(ads, state, estimator, strategy);
+    executeGameLoop(state, strategy, estimator);
 
-        turnExecutor.execute(state, ad, estimator);
-
-        if (state.isAlive()) {
-          shopService.shop(state, strategy);
-        }
-      }
-
-      state.markReachedGoal(state.getScore() >= props.targetScore());
-      log.info(
-          "Game {} finished: score={}, turns={}, reached={}",
-          state.getGameId(),
-          state.getScore(),
-          state.getTurn(),
-          state.isReachedGoal());
-      return state;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return state;
   }
 
   @Override
@@ -87,7 +68,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
           scores.add(gs.getScore());
         }
       } catch (Exception e) {
-        log.warn("A game failed and was skipped: {}", e.getMessage());
+        log.warn("A game could not be started and was skipped: {}", e.getMessage());
       }
     }
 
@@ -96,13 +77,55 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
     return stats;
   }
 
-  /** Wrapper so one failed game doesn't abort the batch; null return signals a failed run. */
+  /** Wraps the game execution to catch errors, returning the partial state if interrupted. */
   private GameState playGameSafely(StrategyType strategyType) {
+    GameState state = null;
     try {
-      return playGame(strategyType);
+      state = gameService.start();
+      GameStrategy strategy = strategyRegistry.resolve(strategyType);
+      ProbabilityEstimator estimator = new ProbabilityEstimator();
+
+      log.info(
+          "Started game {} (lives={}, gold={})",
+          state.getGameId(),
+          state.getLives(),
+          state.getGold());
+
+      executeGameLoop(state, strategy, estimator);
     } catch (Exception e) {
-      log.warn("Game run failed: {}", e.getMessage());
-      return null;
+      if (state != null) {
+        log.warn(
+            "Game {} interrupted at turn {} (score={}): {}",
+            state.getGameId(),
+            state.getTurn(),
+            state.getScore(),
+            e.getMessage());
+      } else {
+        log.warn("Failed to start game during batch execution: {}", e.getMessage());
+      }
     }
+    return state;
+  }
+
+  private void executeGameLoop(
+      GameState state, GameStrategy strategy, ProbabilityEstimator estimator) {
+    while (state.isAlive() && state.getTurn() < props.maxTurns()) {
+      List<Message> ads = taskService.getTasks(state.getGameId());
+      Message ad = taskService.chooseTask(ads, state, estimator, strategy);
+
+      turnExecutor.execute(state, ad, estimator);
+
+      if (state.isAlive()) {
+        shopService.shop(state, strategy);
+      }
+    }
+
+    state.markReachedGoal(state.getScore() >= props.targetScore());
+    log.info(
+        "Game {} finished: score={}, turns={}, reached={}",
+        state.getGameId(),
+        state.getScore(),
+        state.getTurn(),
+        state.isReachedGoal());
   }
 }
