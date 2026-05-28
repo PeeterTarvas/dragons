@@ -5,6 +5,7 @@ import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.Board;
 import com.bigbank.dragons.service.InteractiveGameService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Optional;
@@ -37,10 +38,10 @@ public class InteractiveGameController {
     return apiMapper.toDto(board);
   }
 
-  @PostMapping("/{gameId}/solve/{adId}")
+  @PostMapping("/{gameId}/solve")
   public SolveResponseDto solve(
-      @PathVariable @NotBlank String gameId, @PathVariable @NotBlank String adId) {
-    return apiMapper.toDto(service.solveAd(gameId, adId));
+      @PathVariable @NotBlank String gameId, @Valid @RequestBody AdDto ad) {
+    return apiMapper.toDto(service.solveAd(gameId, apiMapper.toDomain(ad)));
   }
 
   @GetMapping("/{gameId}/shop")
@@ -48,9 +49,9 @@ public class InteractiveGameController {
     return apiMapper.toListDto(service.getShop(gameId));
   }
 
-  @PostMapping("/{gameId}/buy/{itemId}")
+  @PostMapping("/{gameId}/buy")
   public BuyResponseDto buy(
-      @PathVariable @NotBlank String gameId, @PathVariable @NotBlank String itemId) {
-    return apiMapper.toDto(service.buyItem(gameId, itemId));
+      @PathVariable @NotBlank String gameId, @Valid @RequestBody ShopItemDto itemId) {
+    return apiMapper.toDto(service.buyItem(gameId, apiMapper.toDomain(itemId)));
   }
 }

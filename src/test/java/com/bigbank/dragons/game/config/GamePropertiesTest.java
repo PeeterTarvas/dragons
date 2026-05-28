@@ -8,7 +8,7 @@ public class GamePropertiesTest {
 
   @Test
   void constructorAppliesDefaultsWhenInvalidValuesProvided() {
-    GameProperties props = new GameProperties(0, 0, 0, 0, "", 0.0, 0, 0, 0);
+    GameProperties props = new GameProperties(0.0, 0, 0, 0, "", 0.0, 0, 0, 0);
 
     assertEquals(1000, props.targetScore());
     assertEquals(1000, props.maxTurns());
@@ -23,7 +23,7 @@ public class GamePropertiesTest {
 
   @Test
   void constructorKeepsProvidedValuesWhenValid() {
-    GameProperties props = new GameProperties(500, 100, 2, 10, "low-risk", 0.5, 1, 100, 300);
+    GameProperties props = new GameProperties(500.0, 100, 2, 10, "low-risk", 0.5, 1, 100, 300);
 
     assertEquals(500, props.targetScore());
     assertEquals("low-risk", props.strategy());

@@ -9,30 +9,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdDecoder {
 
-  public Message decode(Message ad) {
+  public Optional<Message> decode(Message ad) {
     if (ad == null) {
-      return null;
+      return Optional.empty();
     }
     int encryptionType = Optional.ofNullable(ad.encrypted()).orElse(0);
-    return switch (encryptionType) {
-      case 1 ->
-          new Message(
-              base64(ad.adId()),
-              base64(ad.message()),
-              ad.reward(),
-              ad.expiresIn(),
-              null,
-              base64(ad.probability()));
-      case 2 ->
-          new Message(
-              rot13(ad.adId()),
-              rot13(ad.message()),
-              ad.reward(),
-              ad.expiresIn(),
-              null,
-              rot13(ad.probability()));
-      default -> ad;
-    };
+    return Optional.of(
+        switch (encryptionType) {
+          case 1 ->
+              new Message(
+                  base64(ad.adId()),
+                  base64(ad.message()),
+                  ad.reward(),
+                  ad.expiresIn(),
+                  null,
+                  base64(ad.probability()));
+          case 2 ->
+              new Message(
+                  rot13(ad.adId()),
+                  rot13(ad.message()),
+                  ad.reward(),
+                  ad.expiresIn(),
+                  null,
+                  rot13(ad.probability()));
+          default -> ad;
+        });
   }
 
   private static String base64(String s) {

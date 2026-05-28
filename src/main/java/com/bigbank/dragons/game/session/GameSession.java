@@ -5,8 +5,8 @@ import com.bigbank.dragons.game.state.GameState;
 import com.bigbank.dragons.probability.ProbabilityEstimator;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public class GameSession {
@@ -14,8 +14,7 @@ public class GameSession {
   private final GameState state;
   private final ProbabilityEstimator estimator;
   private volatile Instant lastAccess;
-
-  @Setter private volatile List<Message> lastBoard = List.of();
+  private volatile Set<Message> availableMessages = Set.of();
 
   public GameSession(GameState state) {
     this.state = state;
@@ -24,6 +23,11 @@ public class GameSession {
   }
 
   public void touch() {
+    this.lastAccess = Instant.now();
+  }
+
+  public void updateAvailableMessages(List<Message> messages) {
+    this.availableMessages = Set.copyOf(messages);
     this.lastAccess = Instant.now();
   }
 }

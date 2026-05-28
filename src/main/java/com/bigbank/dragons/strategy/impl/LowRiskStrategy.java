@@ -10,7 +10,6 @@ import com.bigbank.dragons.strategy.StrategyType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +28,7 @@ public class LowRiskStrategy implements GameStrategy {
   @Override
   public Message chooseAd(List<Message> ads, GameState state, ProbabilityEstimator estimator) {
     return ads.stream()
-        .max(
-            Comparator.comparingDouble((Message ad) -> estimator.estimate(ad))
-                .thenComparingDouble(Message::reward))
+        .max(Comparator.comparingDouble(estimator::estimate).thenComparingDouble(Message::reward))
         .orElseThrow(() -> new IllegalStateException("No tasks available to choose from"));
   }
 
@@ -45,19 +42,18 @@ public class LowRiskStrategy implements GameStrategy {
 
     if (state.getLives() <= properties.lowLivesThreshold() + 1) {
       shopItems.stream()
-          .filter(i -> isHealingPotion(i.name()))
+          .filter(ShopItem::isHealingPotion)
           .filter(i -> i.cost() <= properties.healingPotionMaxCost())
           .min(Comparator.comparingInt(ShopItem::cost))
           .ifPresent(plan::add);
     }
 
-    // 2. Buy upgrades only while staying above the reserve. Cheapest-first = conservative spending.
     int reserve = properties.goldReserve();
     int projectedGold = state.getGold() - plan.stream().mapToInt(ShopItem::cost).sum();
 
     List<ShopItem> upgrades =
         shopItems.stream()
-            .filter(i -> !isHealingPotion(i.name()))
+            .filter(item -> !item.isHealingPotion())
             .sorted(Comparator.comparingInt(ShopItem::cost)) // cheapest first (risk-averse)
             .toList();
 
@@ -68,9 +64,5 @@ public class LowRiskStrategy implements GameStrategy {
       }
     }
     return plan;
-  }
-
-  private static boolean isHealingPotion(String name) {
-    return name != null && name.toLowerCase(Locale.ROOT).contains("healing");
   }
 }

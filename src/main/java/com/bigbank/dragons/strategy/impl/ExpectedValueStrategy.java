@@ -10,7 +10,6 @@ import com.bigbank.dragons.strategy.StrategyType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +41,7 @@ public class ExpectedValueStrategy implements GameStrategy {
 
     if (state.getLives() <= properties.lowLivesThreshold()) {
       shopItems.stream()
-          .filter(i -> isHealingPotion(i.name()))
+          .filter(ShopItem::isHealingPotion)
           .filter(i -> i.cost() <= properties.healingPotionMaxCost())
           .min(Comparator.comparingInt(ShopItem::cost))
           .ifPresent(plan::add);
@@ -53,7 +52,7 @@ public class ExpectedValueStrategy implements GameStrategy {
 
     List<ShopItem> upgrades =
         shopItems.stream()
-            .filter(i -> !isHealingPotion(i.name()))
+            .filter(i -> !i.isHealingPotion())
             .sorted(Comparator.comparingInt(ShopItem::cost).reversed())
             .toList();
 
@@ -64,9 +63,5 @@ public class ExpectedValueStrategy implements GameStrategy {
       }
     }
     return plan;
-  }
-
-  private static boolean isHealingPotion(String name) {
-    return name != null && name.toLowerCase(Locale.ROOT).contains("healing");
   }
 }

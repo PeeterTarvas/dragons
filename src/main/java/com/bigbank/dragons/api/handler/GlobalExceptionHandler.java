@@ -6,7 +6,9 @@ import com.bigbank.dragons.client.exception.MugloarApiException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -89,6 +92,16 @@ public class GlobalExceptionHandler {
         ProblemDetail.forStatusAndDetail(
             HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
     pd.setTitle("Internal error");
+    pd.setProperty("timestamp", Instant.now());
+    log.error(Arrays.toString(ex.getStackTrace()));
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pd);
+  }
+
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<ProblemDetail> handleIllegalState(IllegalStateException ex) {
+    ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    pd.setTitle("Invalid game action");
     pd.setProperty("timestamp", Instant.now());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);

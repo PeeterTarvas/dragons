@@ -8,37 +8,54 @@ import com.bigbank.dragons.domain.SolveResponse;
 import com.bigbank.dragons.game.state.GameState;
 import com.bigbank.dragons.probability.ProbabilityEstimator;
 import com.bigbank.dragons.service.TaskService;
+import com.bigbank.dragons.service.validation.DomainValidator;
 import com.bigbank.dragons.strategy.GameStrategy;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
   private final MugloarClient client;
   private final AdDecoder decoder;
   private final ClientMapper mapper;
+  private final DomainValidator domainValidator;
 
   @Override
   public List<Message> getTasks(String gameId) {
     return client.getMessages(gameId).stream()
         .map(mapper::toDomain)
-        .map(decoder::decode)
-        .filter(Objects::nonNull)
+        .flatMap(m -> decoder.decode(m).stream())
         .toList();
   }
 
   @Override
   public Message chooseTask(
       List<Message> ads, GameState state, ProbabilityEstimator estimator, GameStrategy strategy) {
-    return strategy.chooseAd(ads, state, estimator);
+    Objects.requireNonNull(strategy, "GameStrategy cannot be null");
+    Objects.requireNonNull(estimator, "ProbabilityEstimator cannot be null");
+    domainValidator.validate(state);
+    if (ads == null || ads.isEmpty()) {
+      throw new IllegalArgumentException("Cannot choose a task from an empty or null list of ads");
+    }
+    return strategy.chooseAd(
+        ads.stream().flatMap(m -> decoder.decode(m).stream()).toList(), state, estimator);
   }
 
   @Override
   public SolveResponse solve(GameState state, Message ad) {
-    return mapper.toDomain(client.solve(state.getGameId(), ad.adId()));
+    domainValidator.validate(state);
+    domainValidator.validate(ad);
+    String adId =
+        decoder
+            .decode(ad)
+            .map(Message::adId)
+            .orElseThrow(() -> new IllegalArgumentException("Cannot decode ad for solving"));
+    return mapper.toDomain(client.solve(state.getGameId(), adId));
   }
 }

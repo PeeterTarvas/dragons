@@ -5,12 +5,13 @@ import com.bigbank.dragons.domain.SolveResponse;
 import com.bigbank.dragons.game.state.GameState;
 import com.bigbank.dragons.probability.ProbabilityEstimator;
 import com.bigbank.dragons.strategy.GameStrategy;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 public interface TaskService {
 
   /** Fetch and decode the current messageboard. */
-  List<Message> getTasks(String gameId);
+  List<Message> getTasks(@NotBlank String gameId);
 
   /** Pick the best task to attempt, or empty if none are worth it. */
   Message chooseTask(

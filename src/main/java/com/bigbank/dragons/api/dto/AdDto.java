@@ -1,9 +1,12 @@
 package com.bigbank.dragons.api.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record AdDto(
-    String adId,
-    String message,
-    int reward,
-    int expiresIn,
-    String probability,
-    double estimatedSuccess) {}
+    @NotBlank String adId,
+    @NotBlank String message,
+    Integer reward,
+    Integer expiresIn,
+    @NotBlank String probability,
+    Integer encrypted,
+    Double estimatedSuccess) {}

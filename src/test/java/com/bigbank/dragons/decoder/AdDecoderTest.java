@@ -2,6 +2,7 @@ package com.bigbank.dragons.decoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.bigbank.dragons.domain.Message;
 import java.util.Base64;
@@ -21,8 +22,9 @@ public class AdDecoderTest {
   }
 
   @Test
-  void decodeReturnsNullWhenInputIsNull() {
-    assertNull(decoder.decode(null), "Decoding a null Message should return null");
+  void decodeReturnsEmptyOptionalWhenInputIsNull() {
+    assertTrue(
+        decoder.decode(null).isEmpty(), "Decoding a null Message should return Optional.empty()");
   }
 
   @ParameterizedTest
@@ -31,7 +33,7 @@ public class AdDecoderTest {
   void decodeReturnsOriginalMessageWhenEncryptionIsMissingOrUnknown(Integer encryptionType) {
     Message original = new Message("id-1", "Normal message", 100, 5, encryptionType, "Sure thing");
 
-    Message decoded = decoder.decode(original);
+    Message decoded = decoder.decode(original).orElseThrow();
 
     assertEquals(original, decoded, "The Message should be returned completely untouched");
     assertEquals("Normal message", decoded.message());
@@ -45,7 +47,7 @@ public class AdDecoderTest {
 
     Message encryptedAd = new Message(encodedId, encodedMessage, 500, 10, 1, encodedProbability);
 
-    Message decoded = decoder.decode(encryptedAd);
+    Message decoded = decoder.decode(encryptedAd).orElseThrow();
 
     assertEquals("ad-123", decoded.adId());
     assertEquals("Steal a diamond!", decoded.message());
@@ -64,7 +66,7 @@ public class AdDecoderTest {
     Message encryptedAd =
         new Message(encryptedId, encryptedMessage, 250, 7, 2, encryptedProbability);
 
-    Message decoded = decoder.decode(encryptedAd);
+    Message decoded = decoder.decode(encryptedAd).orElseThrow();
 
     assertEquals("ad-123", decoded.adId());
     assertEquals(

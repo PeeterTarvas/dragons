@@ -1,3 +1,5 @@
 package com.bigbank.dragons.api.dto;
 
-public record ShopItemDto(String id, String name, int cost) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record ShopItemDto(@NotBlank String id, @NotBlank String name, Integer cost) {}

@@ -31,7 +31,7 @@ public class TurnExecutorTest {
     GameState state = mock(GameState.class);
     Message ad = new Message("ad-1", "Solve this", 100, 5, null, Probability.SURE_THING.label());
     SolveResponse solveResponse =
-        new SolveResponse(true, 3, 100, 50, 1, 1, "You successfully solved the mission!");
+        new SolveResponse(true, 3, 100, 50.0, 1, 1, "You successfully solved the mission!");
 
     when(taskService.solve(state, ad)).thenReturn(solveResponse);
 

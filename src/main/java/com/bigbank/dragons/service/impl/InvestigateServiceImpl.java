@@ -6,8 +6,10 @@ import com.bigbank.dragons.domain.Reputation;
 import com.bigbank.dragons.service.InvestigateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 @RequiredArgsConstructor
 public class InvestigateServiceImpl implements InvestigateService {
 
@@ -17,11 +19,5 @@ public class InvestigateServiceImpl implements InvestigateService {
   @Override
   public Reputation investigate(String gameId) {
     return mapper.toDomain(mugloarClient.investigate(gameId));
-  }
-
-  @Override
-  public double calculateReputation(String gameId) {
-    Reputation reputationDto = investigate(gameId);
-    return reputationDto.state() + reputationDto.people() + reputationDto.underworld();
   }
 }

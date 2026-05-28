@@ -22,7 +22,8 @@ game:
   max-turns: 1000
   thread-pool-size: 3
   batch-size: 50
-  strategy: low-risk   # expected-value or low-risk
+  strategy: low-risk    # expected-value or low-risk
   probability-floor: 0.2
   low-lives-threshold: 2
   healing-potion-max-cost: 50
+

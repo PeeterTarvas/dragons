@@ -3,9 +3,11 @@ package com.bigbank.dragons.service.validation;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.game.session.GameSession;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class GameActionValidator {
 
   public void validateGameIsActive(GameSession session) {
@@ -14,17 +16,13 @@ public class GameActionValidator {
     }
   }
 
-  public Message validateAndGetAd(GameSession session, String adId) {
-    if (Optional.ofNullable(session.getLastBoard()).isEmpty() || session.getLastBoard().isEmpty()) {
+  public void validateMessage(GameSession session, Message message) {
+    if (Optional.ofNullable(session.getAvailableMessages()).isEmpty()
+        || session.getAvailableMessages().isEmpty()) {
       throw new IllegalStateException("No tasks available. Please fetch the board first.");
     }
-
-    return session.getLastBoard().stream()
-        .filter(m -> m.adId().equals(adId))
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    "Task '" + adId + "' is not on the current board for this game."));
+    if (!session.getAvailableMessages().contains(message)) {
+      throw new IllegalStateException("Message not available.");
+    }
   }
 }

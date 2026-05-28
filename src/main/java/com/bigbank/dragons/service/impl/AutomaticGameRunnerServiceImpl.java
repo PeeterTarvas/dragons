@@ -10,19 +10,19 @@ import com.bigbank.dragons.service.*;
 import com.bigbank.dragons.strategy.GameStrategy;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
-import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Service
+@Validated
 @RequiredArgsConstructor
 public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerService {
 
@@ -33,6 +33,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
   private final GameProperties props;
   private final StrategyRegistry strategyRegistry;
   private final TurnExecutor turnExecutor;
+  private final ExecutorService batchExecutorService;
 
   @Override
   public GameState playGame(StrategyType strategyType) {
@@ -65,50 +66,43 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
           state.getTurn(),
           state.isReachedGoal());
       return state;
-    } finally {
-      statisticsService.addGameScore(state.getScore());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
   @Override
-  public BatchStats playBatch(@NotBlank int games, StrategyType strategyType) {
-    statisticsService.reset();
-    ExecutorService pool = Executors.newFixedThreadPool(props.threadPoolSize());
-    try {
-      List<Future<?>> futures = new ArrayList<>(games);
-      for (int i = 0; i < games; i++) {
-        futures.add(pool.submit(() -> playGameSafely(strategyType)));
-      }
-      for (Future<?> f : futures) {
-        try {
-          f.get();
-        } catch (Exception e) {
-          log.warn("A game failed and was skipped: {}", e.getMessage());
-        }
-      }
-    } finally {
-      pool.shutdown();
+  public BatchStats playBatch(Integer games, StrategyType strategyType) {
+    ConcurrentLinkedQueue<Double> scores = new ConcurrentLinkedQueue<>();
+    List<Future<GameState>> futures = new ArrayList<>(games);
+
+    for (int i = 0; i < games; i++) {
+      futures.add(batchExecutorService.submit(() -> playGameSafely(strategyType)));
+    }
+
+    for (Future<GameState> f : futures) {
       try {
-        if (!pool.awaitTermination(1, TimeUnit.HOURS)) {
-          log.error("Batch did not finish within timeout");
-          pool.shutdownNow();
+        GameState gs = f.get();
+        if (gs != null) {
+          scores.add(gs.getScore());
         }
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        pool.shutdownNow();
+      } catch (Exception e) {
+        log.warn("A game failed and was skipped: {}", e.getMessage());
       }
     }
-    BatchStats stats = statisticsService.snapshot();
+
+    BatchStats stats = statisticsService.snapshot(scores);
     log.info("Batch finished: {}", stats);
     return stats;
   }
 
-  /** Wrapper so one failed game doesn't kill the batch; failures are simply not recorded. */
-  private void playGameSafely(StrategyType strategyType) {
+  /** Wrapper so one failed game doesn't abort the batch; null return signals a failed run. */
+  private GameState playGameSafely(StrategyType strategyType) {
     try {
-      playGame(strategyType);
+      return playGame(strategyType);
     } catch (Exception e) {
       log.warn("Game run failed: {}", e.getMessage());
+      return null;
     }
   }
 }

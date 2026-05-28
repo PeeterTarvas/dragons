@@ -1,4 +1,10 @@
 package com.bigbank.dragons.api.dto;
 
 public record SolveResponseDto(
-    boolean success, int lives, int gold, int score, int highScore, int turn, String message) {}
+    Boolean success,
+    Integer lives,
+    Integer gold,
+    Integer score,
+    Integer highScore,
+    Integer turn,
+    String message) {}

@@ -3,6 +3,7 @@ package com.bigbank.dragons.game.state;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.bigbank.dragons.domain.BuyResponse;
+import com.bigbank.dragons.domain.TurnLog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,5 +34,23 @@ class GameStateTest {
     assertEquals(4, state.getLives());
     assertEquals(2, state.getLevel());
     assertEquals(5, state.getTurn());
+  }
+
+  @Test
+  void markReachedGoalUpdatesState() {
+    assertFalse(state.isReachedGoal());
+    state.markReachedGoal(true);
+    assertTrue(state.isReachedGoal());
+  }
+
+  @Test
+  void addLogAppendsEntrySuccessfully() {
+    TurnLog mockLog = new TurnLog(1, "Solved task", "Sure thing", true, 10.0, 3, 0);
+    assertTrue(state.getLog().isEmpty());
+
+    state.addLog(mockLog);
+
+    assertEquals(1, state.getLog().size());
+    assertEquals(mockLog, state.getLog().get(0));
   }
 }

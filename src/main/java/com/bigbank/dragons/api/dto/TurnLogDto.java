@@ -1,10 +1,10 @@
 package com.bigbank.dragons.api.dto;
 
 public record TurnLogDto(
-    int turn,
+    Integer turn,
     String message,
     String probability,
     Boolean success,
-    double score,
-    int lives,
-    int gold) {}
+    Double score,
+    Integer lives,
+    Integer gold) {}
