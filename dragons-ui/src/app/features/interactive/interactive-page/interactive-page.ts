@@ -42,7 +42,6 @@ export class InteractivePage {
   private readonly auto = inject(AutoGame);
 
   protected readonly strategies = signal<string[]>([]);
-  protected readonly selectedStrategy = signal<string | null>(null);
 
   protected readonly gameResult = signal<GameResult | null>(null);
   protected readonly showLog = signal<boolean>(false);
@@ -84,7 +83,7 @@ export class InteractivePage {
   }
 
   protected onStart(strategy: string | null): void {
-    this.selectedStrategy.set(strategy);
+    this.store.selectedStrategy.set(strategy);
     this.store.setLoading(true);
     this.interactive
       .start()
@@ -181,14 +180,13 @@ export class InteractivePage {
 
   protected newGame(): void {
     this.store.reset();
-    this.selectedStrategy.set(null);
     this.gameResult.set(null);
     this.showLog.set(false);
     this.form.reset({ selectedAdId: null, selectedItemId: null });
   }
 
   private loadBoardAndShop(gameId: string) {
-    const strategy = this.selectedStrategy() ?? undefined;
+    const strategy = this.store.selectedStrategy() ?? undefined;
     return forkJoin({
       board: this.interactive.getBoard(gameId, strategy),
       shop: this.interactive.getShop(gameId),

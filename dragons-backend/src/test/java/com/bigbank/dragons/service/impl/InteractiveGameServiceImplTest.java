@@ -83,7 +83,7 @@ public class InteractiveGameServiceImplTest {
 
     assertEquals("", result.recommendedAdId());
     assertEquals(1, result.messages().size());
-    assertEquals("ad-1", result.messages().get(0).message().adId());
+    assertEquals("ad-1", result.messages().getFirst().message().adId());
     verify(validator).validateGameIsActive(mockSession);
     verify(mockSession).updateAvailableMessages(anyList());
   }

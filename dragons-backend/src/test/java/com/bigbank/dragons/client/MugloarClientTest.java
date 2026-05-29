@@ -106,6 +106,7 @@ class MugloarClientTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   void getMessagesSuccessReturnsList() {
     List<MessageDto> expected = List.of(mock(MessageDto.class));
     when(restClient
@@ -121,6 +122,7 @@ class MugloarClientTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   void getMessagesEmptyBodyThrowsException() {
     when(restClient
             .get()
@@ -196,6 +198,7 @@ class MugloarClientTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   void getShopSuccessReturnsList() {
     List<ShopItemDto> expected = List.of(mock(ShopItemDto.class));
     when(restClient
@@ -211,6 +214,7 @@ class MugloarClientTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   void getShopEmptyBodyThrowsException() {
     when(restClient
             .get()
