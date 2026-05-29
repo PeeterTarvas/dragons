@@ -5,6 +5,7 @@ import { BuyResponse } from '../models/buy-response.model';
 import { GameState } from '../models/game-state.model';
 import { ShopItem } from '../models/shop-item.model';
 import { SolveResponse } from '../models/solve-response.model';
+import {GameResult} from '../models/game-result.model';
 
 @Injectable({ providedIn: 'root' })
 export class GameStoreService {
@@ -41,6 +42,10 @@ export class GameStoreService {
     this.turn.set(state.turn);
   }
 
+  applyGameResult(result: GameResult): void {
+    this.applyGameState(result.gameStateDto);
+  }
+
   setBoard(board: Board): void {
     this.ads.set(board.ads);
     this.recommendedAdId.set(board.recommendedAdId);
@@ -66,10 +71,6 @@ export class GameStoreService {
 
   setError(message: string | null): void {
     this.error.set(message);
-  }
-
-  clearError(): void {
-    this.error.set(null);
   }
 
   setLoading(value: boolean): void {

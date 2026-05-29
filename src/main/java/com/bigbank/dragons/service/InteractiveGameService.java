@@ -20,4 +20,6 @@ public interface InteractiveGameService {
   List<ShopItem> getShop(@NotBlank String gameId);
 
   BuyResponse buyItem(@NotBlank String gameId, ShopItem itemId);
+
+  GameState getGameState(@NotBlank String gameId);
 }

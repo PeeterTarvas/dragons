@@ -94,6 +94,13 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
     return shopService.buyItem(session.getState(), shopItem);
   }
 
+  @Override
+  public GameState getGameState(String gameId) {
+    GameSession session = sessionStore.get(gameId);
+    validator.validateGameIsActive(session);
+    return session.getState();
+  }
+
   private Board buildBoard(String gameId, Optional<GameStrategy> strategyOpt) {
     GameSession session = sessionStore.get(gameId);
     validator.validateGameIsActive(session);

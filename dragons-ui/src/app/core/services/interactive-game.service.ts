@@ -7,6 +7,7 @@ import { GameState } from '../models/game-state.model';
 import { ShopItem } from '../models/shop-item.model';
 import { SolveResponse } from '../models/solve-response.model';
 import {Message} from '../models/message.model';
+import {GameResult} from '../models/game-result.model';
 
 @Injectable({ providedIn: 'root' })
 export class InteractiveGameService {
@@ -35,5 +36,9 @@ export class InteractiveGameService {
 
   buy(gameId: string, item: ShopItem): Observable<BuyResponse> {
     return this.http.post<BuyResponse>(`${this.base}/${encodeURIComponent(gameId)}/buy`, item);
+  }
+
+  state(gameId: string): Observable<GameResult> {
+    return this.http.get<GameResult>(`${this.base}/${encodeURIComponent(gameId)}/state`);
   }
 }

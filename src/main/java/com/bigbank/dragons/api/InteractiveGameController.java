@@ -54,4 +54,9 @@ public class InteractiveGameController {
       @PathVariable @NotBlank String gameId, @Valid @RequestBody ShopItemDto itemId) {
     return apiMapper.toDto(service.buyItem(gameId, apiMapper.toDomain(itemId)));
   }
+
+  @GetMapping("/{gameId}/state")
+  public GameResultDto state(@PathVariable @NotBlank String gameId) {
+    return apiMapper.toGameResultDto(service.getGameState(gameId));
+  }
 }

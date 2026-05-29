@@ -1,0 +1,23 @@
+<section class="border-2 border-black p-4 max-w-xl mx-auto">
+  <h2 class="text-lg font-bold mb-3">New game</h2>
+  <p class="mb-2">Choose a recommendation strategy:</p>
+  <div class="flex flex-wrap gap-2 mb-4">
+    @for (s of strategies(); track s) {
+      <button type="button" class="border-2 px-3 py-1"
+              [class.border-green-600]="isSelected(s)"
+              [class.border-black]="!isSelected(s)"
+              (click)="choose(s)">
+        {{ s }}
+      </button>
+    }
+    <button type="button" class="border-2 px-3 py-1"
+            [class.border-green-600]="isSelected(null)"
+            [class.border-black]="!isSelected(null)"
+            (click)="choose(null)">
+      None
+    </button>
+  </div>
+  <button type="button" class="border-2 border-black px-4 py-2 font-semibold" (click)="emitStart()">
+    Start game
+  </button>
+</section>
