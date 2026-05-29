@@ -2,12 +2,12 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { errorInterceptor } from '../error-interceptor';
-import { GameStoreService } from '../../services/game-store.service';
+import { GameStore } from '../../services/game-store';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;
   let httpMock: HttpTestingController;
-  let store: GameStoreService;
+  let store: GameStore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -18,7 +18,7 @@ describe('errorInterceptor', () => {
     });
     http = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
-    store = TestBed.inject(GameStoreService);
+    store = TestBed.inject(GameStore);
   });
 
   afterEach(() => httpMock.verify());

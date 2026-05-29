@@ -1,16 +1,16 @@
 import { TestBed } from '@angular/core/testing';
-import { GameStoreService } from '../game-store.service';
+import { GameStore } from '../game-store';
 import { GameState } from '../../models/game-state.model';
 
-describe('GameStoreService', () => {
-  let store: GameStoreService;
+describe('GameStore', () => {
+  let store: GameStore;
   const state: GameState = {
     gameId: 'g1', lives: 3, gold: 100, level: 0, score: 0, turn: 0, reachedGoal: false,
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    store = TestBed.inject(GameStoreService);
+    store = TestBed.inject(GameStore);
   });
 
   it('hasGame is false until a game starts', () => {

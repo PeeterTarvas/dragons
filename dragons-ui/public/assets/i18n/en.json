@@ -1,0 +1,86 @@
+{
+  "common": {
+    "loading": "Loading…"
+  },
+  "interactive": {
+    "title": "Dragons — Interactive",
+    "autoRunnerLink": "Auto-runner →",
+    "newGame": "New game",
+    "gameLog": "Game log",
+    "recommended": "Recommended",
+    "adMeta": {
+      "reward": "Reward:",
+      "expiresIn": "Expires in:"
+    },
+    "itemMeta": {
+      "cost": "Cost:"
+    },
+    "actions": {
+      "doQuest": "Do message quest",
+      "buyItem": "Buy item"
+    },
+    "sections": {
+      "messages": "Messages",
+      "shop": "Shop"
+    },
+    "empty": {
+      "noMessages": "No messages available.",
+      "noItems": "No items available."
+    },
+    "shop": {
+      "insufficientGold": "Not enough gold for this item."
+    },
+    "gameOver": {
+      "title": "Game over",
+      "finalScore": "Final score:",
+      "viewLog": "View game log",
+      "newGame": "New game"
+    }
+  },
+  "stats": {
+    "lives": "Lives",
+    "gold": "Gold",
+    "score": "Score",
+    "level": "Level",
+    "turn": "Turn"
+  },
+  "start": {
+    "title": "New game",
+    "chooseStrategy": "Choose a recommendation strategy:",
+    "none": "None",
+    "startGame": "Start game"
+  },
+  "log": {
+    "title": "Game log",
+    "close": "Close",
+    "currentStats": "Current stats",
+    "turns": "Turns",
+    "noTurns": "No turns recorded.",
+    "success": "Success",
+    "failed": "Failed",
+    "stat": {
+      "lives": "Lives",
+      "gold": "Gold",
+      "score": "Score",
+      "level": "Level",
+      "turn": "Turn"
+    },
+    "col": {
+      "index": "#",
+      "message": "Message",
+      "probability": "Probability",
+      "result": "Result",
+      "score": "Score",
+      "lives": "Lives",
+      "gold": "Gold"
+    }
+  },
+  "error": {
+    "dismiss": "Dismiss"
+  },
+  "auto": {
+    "title": "Dragons — Auto-runner",
+    "interactiveLink": "← Interactive",
+    "comingSoon": "Auto-runner coming soon."
+  }
+}

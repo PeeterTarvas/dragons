@@ -16,9 +16,9 @@ import {
 import { RouterLink } from '@angular/router';
 import {finalize, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
 
-import { GameStoreService } from '../../../core/services/game-store.service';
-import { InteractiveGameService } from '../../../core/services/interactive-game.service';
-import { AutoGameService } from '../../../core/services/auto-game.service';
+import { GameStore } from '../../../core/services/game-store';
+import { InteractiveGame } from '../../../core/services/interactive-game';
+import { AutoGame } from '../../../core/services/auto-game';
 import { Message } from '../../../core/models/message.model';
 import { StartScreen } from '../components/start-screen/start-screen';
 import { PlayerStats } from '../components/player-stats/player-stats';
@@ -26,19 +26,20 @@ import { ErrorBanner } from '../../../shared/components/error-banner/error-banne
 import { LoadingSpinner } from '../../../shared/components/loading-spinner/loading-spinner';
 import {GameResult} from '../../../core/models/game-result.model';
 import {GameLog} from '../components/game-log/game-log';
+import {TranslocoPipe} from '@ngneat/transloco';
 
 
 
 @Component({
   selector: 'app-interactive-page',
-  imports: [ReactiveFormsModule, RouterLink, StartScreen, PlayerStats, ErrorBanner, LoadingSpinner, StartScreen, GameLog],
+  imports: [ReactiveFormsModule, RouterLink, StartScreen, PlayerStats, ErrorBanner, LoadingSpinner, StartScreen, GameLog, TranslocoPipe],
   templateUrl: './interactive-page.html',
   styleUrl: './interactive-page.css',
 })
 export class InteractivePage {
-  protected readonly store = inject(GameStoreService);
-  private readonly interactive = inject(InteractiveGameService);
-  private readonly auto = inject(AutoGameService);
+  protected readonly store = inject(GameStore);
+  private readonly interactive = inject(InteractiveGame);
+  private readonly auto = inject(AutoGame);
 
   protected readonly strategies = signal<string[]>([]);
   protected readonly selectedStrategy = signal<string | null>(null);

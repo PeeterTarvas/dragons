@@ -1,9 +1,12 @@
 import {Component, input, output} from '@angular/core';
 import {GameResult} from '../../../../core/models/game-result.model';
+import {TranslocoPipe} from '@ngneat/transloco';
 
 @Component({
   selector: 'app-game-log',
-  imports: [],
+  imports: [
+    TranslocoPipe
+  ],
   templateUrl: './game-log.html',
   styleUrl: './game-log.css',
 })

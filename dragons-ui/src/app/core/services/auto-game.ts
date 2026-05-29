@@ -3,11 +3,12 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BatchStats } from '../models/batch-stats.model';
 import { GameResult } from '../models/game-result.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
-export class AutoGameService {
+export class AutoGame {
   private readonly http = inject(HttpClient);
-  private readonly base = '/api';
+  private readonly base = environment.apiUrl;
 
   play(strategy?: string): Observable<GameResult> {
     let params = new HttpParams();

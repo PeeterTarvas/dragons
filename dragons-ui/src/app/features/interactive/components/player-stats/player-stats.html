@@ -1,7 +1,7 @@
 <div class="flex flex-wrap gap-2">
-  <app-stat-badge label="Lives" [value]="store.lives()" />
-  <app-stat-badge label="Gold" [value]="store.gold()" />
-  <app-stat-badge label="Score" [value]="store.score()" />
-  <app-stat-badge label="Level" [value]="store.level()" />
-  <app-stat-badge label="Turn" [value]="store.turn()" />
+  <app-stat-badge label="{{ 'stats.lives' | transloco }}" [value]="store.lives()" />
+  <app-stat-badge label="{{ 'stats.gold' | transloco }}" [value]="store.gold()" />
+  <app-stat-badge label="{{ 'stats.score' | transloco }}" [value]="store.score()" />
+  <app-stat-badge label="{{ 'stats.level' | transloco }}" [value]="store.level()" />
+  <app-stat-badge label="{{ 'stats.turn' | transloco }}" [value]="store.turn()" />
 </div>

@@ -1,8 +1,12 @@
 import { Component, input, output, signal } from '@angular/core';
+import {TranslocoPipe} from '@ngneat/transloco';
 
 @Component({
   selector: 'app-start-screen',
   templateUrl: './start-screen.html',
+  imports: [
+    TranslocoPipe
+  ]
 })
 export class StartScreen {
   strategies = input<string[]>([]);

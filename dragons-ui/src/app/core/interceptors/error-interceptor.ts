@@ -2,10 +2,10 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { ProblemDetail } from '../models/problem-detail.model';
-import { GameStoreService } from '../services/game-store.service';
+import { GameStore } from '../services/game-store';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const store = inject(GameStoreService);
+  const store = inject(GameStore);
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
       store.setError(toMessage(err));

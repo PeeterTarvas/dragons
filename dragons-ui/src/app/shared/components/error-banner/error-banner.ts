@@ -1,12 +1,14 @@
 import {Component, inject} from '@angular/core';
-import {GameStoreService} from '../../../core/services/game-store.service';
+import {GameStore} from '../../../core/services/game-store';
+import {TranslocoPipe} from '@ngneat/transloco';
 
 @Component({
   selector: 'app-error-banner',
-  templateUrl: './error-banner.html'
+  templateUrl: './error-banner.html',
+  imports: [TranslocoPipe],
 })
 export class ErrorBanner {
-  store = inject(GameStoreService);
+  store = inject(GameStore);
 
   dismiss(): void {
     this.store.setError(null);

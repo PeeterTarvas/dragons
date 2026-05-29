@@ -1,17 +1,17 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AutoGameService } from '../auto-game.service';
+import { AutoGame } from '../auto-game';
 
-describe('AutoGameService', () => {
-  let service: AutoGameService;
+describe('AutoGame', () => {
+  let service: AutoGame;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
-    service = TestBed.inject(AutoGameService);
+    service = TestBed.inject(AutoGame);
     httpMock = TestBed.inject(HttpTestingController);
   });
 

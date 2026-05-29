@@ -1,18 +1,18 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { InteractiveGameService } from '../interactive-game.service';
+import { InteractiveGame } from '../interactive-game';
 import { GameState } from '../../models/game-state.model';
 
-describe('InteractiveGameService', () => {
-  let service: InteractiveGameService;
+describe('InteractiveGame', () => {
+  let service: InteractiveGame;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
-    service = TestBed.inject(InteractiveGameService);
+    service = TestBed.inject(InteractiveGame);
     httpMock = TestBed.inject(HttpTestingController);
   });
 

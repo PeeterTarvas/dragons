@@ -8,11 +8,12 @@ import { ShopItem } from '../models/shop-item.model';
 import { SolveResponse } from '../models/solve-response.model';
 import {Message} from '../models/message.model';
 import {GameResult} from '../models/game-result.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
-export class InteractiveGameService {
+export class InteractiveGame {
   private readonly http = inject(HttpClient);
-  private readonly base = '/api/games';
+  private readonly base = `${environment.apiUrl}/games`;
 
   start(): Observable<GameState> {
     return this.http.get<GameState>(`${this.base}/play`);

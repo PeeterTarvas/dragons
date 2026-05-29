@@ -8,7 +8,7 @@ import { SolveResponse } from '../models/solve-response.model';
 import {GameResult} from '../models/game-result.model';
 
 @Injectable({ providedIn: 'root' })
-export class GameStoreService {
+export class GameStore {
   readonly gameId = signal<string | null>(null);
   readonly lives = signal<number>(0);
   readonly gold = signal<number>(0);
