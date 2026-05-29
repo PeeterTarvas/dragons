@@ -8,6 +8,7 @@ mugloar:
   read-timeout: 30
   max-attempts: 4
   initial-backoff-ms: 500
+  multiplier: 2
 
 springdoc:
   api-docs:

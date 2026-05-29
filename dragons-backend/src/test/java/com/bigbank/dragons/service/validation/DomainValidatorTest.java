@@ -1,6 +1,8 @@
 package com.bigbank.dragons.service.validation;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.domain.ShopItem;

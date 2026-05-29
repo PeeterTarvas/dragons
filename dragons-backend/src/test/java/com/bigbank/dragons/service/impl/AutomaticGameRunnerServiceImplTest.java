@@ -3,8 +3,20 @@ package com.bigbank.dragons.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+import com.bigbank.dragons.api.dto.GameResultDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.domain.Message;
@@ -18,6 +30,7 @@ import com.bigbank.dragons.service.TaskService;
 import com.bigbank.dragons.strategy.GameStrategy;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -36,6 +49,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @ExtendWith(MockitoExtension.class)
 class AutomaticGameRunnerServiceImplTest {
 
+  @Mock private ApiMapper apiMapper;
   @Mock private GameService gameService;
   @Mock private TaskService taskService;
   @Mock private ShopService shopService;
@@ -44,7 +58,6 @@ class AutomaticGameRunnerServiceImplTest {
   @Mock private StrategyRegistry strategyRegistry;
   @Mock private TurnExecutor turnExecutor;
   @Mock private ExecutorService batchExecutorService;
-  @Mock private ApiMapper apiMapper;
 
   @Captor private ArgumentCaptor<Callable<GameState>> callableCaptor;
 
@@ -288,6 +301,28 @@ class AutomaticGameRunnerServiceImplTest {
 
     verify(taskService, never()).getTasks(anyString());
     verify(state).markReachedGoal(false);
+    verify(emitter).complete();
+  }
+
+  @Test
+  void playGameStreamingSendsStateMappedThroughApiMapper() throws IOException {
+    SseEmitter emitter = mock(SseEmitter.class);
+    GameResultDto dto = mock(GameResultDto.class);
+
+    when(strategyRegistry.resolve(StrategyType.EXPECTED_VALUE)).thenReturn(strategy);
+    when(gameService.start()).thenReturn(state);
+    when(state.isAlive()).thenReturn(true);
+    when(props.maxTurns()).thenReturn(10);
+    when(state.getTurn()).thenReturn(10);
+    when(state.getGameId()).thenReturn("game-1");
+    when(state.getScore()).thenReturn(500.0);
+    when(props.targetScore()).thenReturn(1000.0);
+    when(apiMapper.toGameResultDto(state)).thenReturn(dto);
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(apiMapper, atLeastOnce()).toGameResultDto(state);
+    verify(emitter, atLeastOnce()).send(any(SseEmitter.SseEventBuilder.class));
     verify(emitter).complete();
   }
 }

@@ -1,7 +1,10 @@
 package com.bigbank.dragons.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.client.MugloarClient;
 import com.bigbank.dragons.client.dto.MessageDto;
@@ -30,8 +33,7 @@ class TaskServiceImplTest {
   @Mock private AdDecoder decoder;
   @Mock private ClientMapper mapper;
 
-  @Mock
-  private DomainValidator domainValidator; // Needed actually but IntelliJ does not pick this up
+  @Mock private DomainValidator domainValidator;
 
   @InjectMocks private TaskServiceImpl taskService;
 

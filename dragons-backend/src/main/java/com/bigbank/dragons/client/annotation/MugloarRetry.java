@@ -15,7 +15,7 @@ import org.springframework.web.client.HttpServerErrorException;
       HttpClientErrorException.TooManyRequests.class,
       HttpServerErrorException.ServiceUnavailable.class
     },
-    maxRetriesString = "${mugloar.max-attempts:4}",
-    delayString = "${mugloar.initial-backoff-ms:500}",
+    maxRetriesString = "${mugloar.max-attempts}",
+    delayString = "${mugloar.initial-backoff-ms}",
     multiplier = 2)
 public @interface MugloarRetry {}

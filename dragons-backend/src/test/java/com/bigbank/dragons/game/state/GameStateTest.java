@@ -1,6 +1,8 @@
 package com.bigbank.dragons.game.state;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.bigbank.dragons.domain.BuyResponse;
 import com.bigbank.dragons.domain.TurnLog;

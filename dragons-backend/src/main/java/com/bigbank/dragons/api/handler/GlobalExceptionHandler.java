@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
             HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
     pd.setTitle("Internal error");
     pd.setProperty("timestamp", Instant.now());
-    log.error(Arrays.toString(ex.getStackTrace()));
+    log.error(Arrays.toString(ex.getStackTrace())); // Only log for internal server error
 
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pd);
   }

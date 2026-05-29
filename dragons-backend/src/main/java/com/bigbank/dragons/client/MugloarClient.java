@@ -94,6 +94,7 @@ public class MugloarClient {
                 new MugloarApiException("Purchase returned an empty response for item " + itemId));
   }
 
+  // If any more validation methods are required then I would do a separate validator
   private static void requireNotBlank(String value, String name) {
     if (value == null || value.isBlank()) {
       throw new IllegalArgumentException(name + " must not be blank");

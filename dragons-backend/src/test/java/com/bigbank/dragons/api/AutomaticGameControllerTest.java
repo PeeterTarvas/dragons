@@ -126,4 +126,30 @@ public class AutomaticGameControllerTest {
     assertNotNull(result);
     verify(batchExecutorService).submit(any(Runnable.class));
   }
+
+  @Test
+  void playFallsBackToExpectedValueWhenConfiguredStrategyAlsoInvalid() {
+    GameState state = mock(GameState.class);
+    GameResultDto expectedDto = mock(GameResultDto.class);
+
+    when(gameProperties.strategy()).thenReturn("also-bogus");
+    when(automaticGameRunnerService.playGame(StrategyType.EXPECTED_VALUE)).thenReturn(state);
+    when(apiMapper.toGameResultDto(state)).thenReturn(expectedDto);
+
+    GameResultDto result = controller.play("bogus-strategy");
+
+    assertEquals(expectedDto, result);
+    verify(automaticGameRunnerService).playGame(StrategyType.EXPECTED_VALUE);
+  }
+
+  @Test
+  void streamGameWithNullStrategyFallsBackToConfiguredStrategy() {
+    when(gameProperties.strategy()).thenReturn("low-risk");
+
+    SseEmitter result = controller.streamGame(null);
+
+    assertNotNull(result);
+    verify(gameProperties).strategy();
+    verify(batchExecutorService).submit(any(Runnable.class));
+  }
 }
