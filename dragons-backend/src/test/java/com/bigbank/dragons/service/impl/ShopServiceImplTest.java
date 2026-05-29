@@ -110,4 +110,29 @@ public class ShopServiceImplTest {
     doThrow(new IllegalArgumentException("invalid")).when(domainValidator).validate(state);
     assertThrows(IllegalArgumentException.class, () -> shopService.buyItem(state, shopItem));
   }
+
+  @Test
+  void shopDoesNotTrackItemWhenPurchaseFails() {
+    GameState state = mock(GameState.class);
+    GameStrategy strategy = mock(GameStrategy.class);
+    ShopItem item = new ShopItem("1", "Potion", 50);
+
+    ShopItemDto itemDto = mock(ShopItemDto.class);
+    BuyResponseDto buyDto = mock(BuyResponseDto.class);
+
+    when(state.getGameId()).thenReturn("game-id");
+    when(state.getGold()).thenReturn(100);
+    when(client.getShop("game-id")).thenReturn(List.of(itemDto));
+    when(mapper.toDomain(itemDto)).thenReturn(item);
+    when(strategy.choosePurchases(anyList(), eq(state))).thenReturn(List.of(item));
+
+    BuyResponse failed = new BuyResponse(false, 100, 3, 1, 1);
+    when(client.buy("game-id", "1")).thenReturn(buyDto);
+    when(mapper.toDomain(buyDto)).thenReturn(failed);
+
+    List<ShopItem> bought = shopService.shop(state, strategy);
+
+    assertEquals(0, bought.size());
+    verify(state).updateAfterBuy(failed);
+  }
 }

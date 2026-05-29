@@ -1,6 +1,7 @@
 package com.bigbank.dragons.strategy.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.domain.Message;
@@ -27,7 +28,7 @@ public class LowRiskStrategyTest {
   @InjectMocks private LowRiskStrategy strategy;
 
   @Test
-  void type_IsLowRisk() {
+  void typeIsLowRisk() {
     assertEquals(StrategyType.LOW_RISK, strategy.type());
   }
 
@@ -47,25 +48,24 @@ public class LowRiskStrategyTest {
   }
 
   @Test
-  void choosePurchasesHealsEarlierThanExpectedValueStrategy() {
+  void choosePurchasesDoesNotBuyHealingWhenLivesAboveEnhancedThreshold() {
     when(properties.lowLivesThreshold()).thenReturn(2);
-    when(properties.healingPotionMaxCost()).thenReturn(50);
     when(properties.goldReserve()).thenReturn(0);
 
-    when(gameState.getLives()).thenReturn(3);
+    when(gameState.getLives()).thenReturn(5);
     when(gameState.getGold()).thenReturn(100);
 
     ShopItem potion = new ShopItem("p1", "Healing potion", 50);
     List<ShopItem> plan = strategy.choosePurchases(List.of(potion), gameState);
 
-    assertEquals(1, plan.size());
-    assertEquals(potion, plan.getFirst());
+    assertEquals(0, plan.size());
   }
 
   @Test
   void choosePurchasesBuysCheapestUpgradesFirstRespectingReserve() {
     when(properties.lowLivesThreshold()).thenReturn(1);
     when(properties.goldReserve()).thenReturn(100);
+    when(properties.extraLivesBuffer()).thenReturn(1);
 
     when(gameState.getLives()).thenReturn(5);
     when(gameState.getGold()).thenReturn(200);
@@ -78,5 +78,60 @@ public class LowRiskStrategyTest {
 
     assertEquals(1, plan.size());
     assertEquals(cheapUpgrade, plan.getFirst());
+  }
+
+  @Test
+  void choosePurchasesSkipsUpgradeWhenReserveInsufficient() {
+    when(properties.lowLivesThreshold()).thenReturn(1);
+    when(properties.goldReserve()).thenReturn(200);
+
+    when(gameState.getLives()).thenReturn(5);
+    when(gameState.getGold()).thenReturn(250);
+
+    ShopItem cheapUpgrade = new ShopItem("u1", "Claw Sharpening", 60);
+
+    List<ShopItem> plan = strategy.choosePurchases(List.of(cheapUpgrade), gameState);
+
+    assertEquals(0, plan.size());
+  }
+
+  @Test
+  void chooseAdThrowsWhenNoAdsAvailable() {
+    assertThrows(
+        IllegalStateException.class, () -> strategy.chooseAd(List.of(), gameState, estimator));
+  }
+
+  @Test
+  void choosePurchasesBuysCheapestAffordablePotionWhenLivesAtEnhancedThreshold() {
+    when(properties.lowLivesThreshold()).thenReturn(2);
+    when(properties.extraLivesBuffer()).thenReturn(1);
+    when(properties.healingPotionMaxCost()).thenReturn(50);
+    when(properties.goldReserve()).thenReturn(0);
+    when(gameState.getLives()).thenReturn(3);
+    when(gameState.getGold()).thenReturn(100);
+
+    ShopItem cheapPotion = new ShopItem("p1", "Healing potion", 30);
+    ShopItem dearPotion = new ShopItem("p2", "Healing potion", 80); // > maxCost, filtered out
+
+    List<ShopItem> plan = strategy.choosePurchases(List.of(cheapPotion, dearPotion), gameState);
+
+    assertEquals(1, plan.size());
+    assertEquals(cheapPotion, plan.getFirst());
+  }
+
+  @Test
+  void choosePurchasesBuysNoPotionWhenAllPotionsExceedMaxCost() {
+    when(properties.lowLivesThreshold()).thenReturn(2);
+    when(properties.extraLivesBuffer()).thenReturn(1);
+    when(properties.healingPotionMaxCost()).thenReturn(50);
+    when(properties.goldReserve()).thenReturn(0);
+    when(gameState.getLives()).thenReturn(2);
+    when(gameState.getGold()).thenReturn(100);
+
+    ShopItem dearPotion = new ShopItem("p1", "Healing potion", 80);
+
+    List<ShopItem> plan = strategy.choosePurchases(List.of(dearPotion), gameState);
+
+    assertEquals(0, plan.size());
   }
 }

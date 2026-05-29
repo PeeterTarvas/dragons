@@ -1,5 +1,6 @@
 package com.bigbank.dragons.service.impl;
 
+import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.game.config.GameProperties;
@@ -36,6 +37,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
   private final StrategyRegistry strategyRegistry;
   private final TurnExecutor turnExecutor;
   private final ExecutorService batchExecutorService;
+  private final ApiMapper apiMapper;
 
   @Override
   public GameState playGame(StrategyType strategyType) {
@@ -81,7 +83,6 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
 
   @Override
   public void playGameStreaming(StrategyType strategyType, SseEmitter emitter) {
-    // TODO: Not sure if this should send state or a DTO
     try {
       GameState state = gameService.start();
       GameStrategy strategy = strategyRegistry.resolve(strategyType);
@@ -125,7 +126,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
   }
 
   private void sendState(SseEmitter emitter, GameState state) throws IOException {
-    emitter.send(SseEmitter.event().name("turn").data(state));
+    emitter.send(SseEmitter.event().name("turn").data(apiMapper.toGameResultDto(state)));
   }
 
   private GameState playGameSafely(StrategyType strategyType) {

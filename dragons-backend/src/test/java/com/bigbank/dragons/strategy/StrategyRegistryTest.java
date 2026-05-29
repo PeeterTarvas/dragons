@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.bigbank.dragons.game.config.GameProperties;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ public class StrategyRegistryTest {
 
   @Mock private GameStrategy expectedValueStrategy;
   @Mock private GameStrategy lowRiskStrategy;
+  @Mock private GameProperties properties;
 
   private StrategyRegistry registry;
 
@@ -23,8 +25,9 @@ public class StrategyRegistryTest {
   void setUp() {
     when(expectedValueStrategy.type()).thenReturn(StrategyType.EXPECTED_VALUE);
     when(lowRiskStrategy.type()).thenReturn(StrategyType.LOW_RISK);
+    when(properties.strategy()).thenReturn("expected-value");
 
-    registry = new StrategyRegistry(List.of(expectedValueStrategy, lowRiskStrategy));
+    registry = new StrategyRegistry(List.of(expectedValueStrategy, lowRiskStrategy), properties);
   }
 
   @Test
@@ -34,9 +37,10 @@ public class StrategyRegistryTest {
   }
 
   @Test
-  void resolveReturnsDefaultExpectedValueWhenNullPassed() {
+  void resolveReturnsConfiguredDefaultWhenNullPassed() {
     GameStrategy resolved = registry.resolve(null);
-    assertEquals(expectedValueStrategy, resolved, "Should fallback to EXPECTED_VALUE");
+    assertEquals(
+        expectedValueStrategy, resolved, "Should fallback to EXPECTED_VALUE based on config");
   }
 
   @Test

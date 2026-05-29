@@ -1,6 +1,7 @@
 package com.bigbank.dragons.game.session;
 
 import com.bigbank.dragons.api.exception.GameNotFoundException;
+import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.game.state.GameState;
 import java.time.Duration;
 import java.time.Instant;
@@ -13,9 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class GameSessionStore {
 
-  private static final Duration TTL = Duration.ofMinutes(30);
-
   private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
+  private final Duration ttl;
+
+  public GameSessionStore(GameProperties properties) {
+    this.ttl = Duration.ofMinutes(properties.sessionTtlMinutes());
+  }
 
   public void create(GameState state) {
     GameSession session = new GameSession(state);
@@ -36,10 +40,10 @@ public class GameSessionStore {
     sessions.remove(gameId);
   }
 
-  /** Evicts abandoned sessions so the map doesn't grow unbounded. Runs every 10 minutes. */
-  @Scheduled(fixedRate = 10 * 60 * 1000)
+  /** Evicts abandoned sessions so the map doesn't grow unbounded. */
+  @Scheduled(fixedRateString = "${game.session-eviction-rate-ms}")
   void evictExpired() {
-    Instant cutoff = Instant.now().minus(TTL);
+    Instant cutoff = Instant.now().minus(ttl);
     sessions.entrySet().removeIf(e -> e.getValue().getLastAccess().isBefore(cutoff));
   }
 }

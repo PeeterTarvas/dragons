@@ -3,6 +3,7 @@ package com.bigbank.dragons.api;
 import com.bigbank.dragons.api.dto.BatchStatsDto;
 import com.bigbank.dragons.api.dto.GameResultDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
+import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.service.AutomaticGameRunnerService;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
@@ -30,18 +31,29 @@ public class AutomaticGameController {
   private final ApiMapper apiMapper;
   private final StrategyRegistry strategyRegistry;
   private final ExecutorService batchExecutorService;
+  private final GameProperties gameProperties;
 
   @PostMapping("/play")
   public GameResultDto play(@RequestParam(required = false) String strategy) {
-    StrategyType type = StrategyType.fromKey(strategy).orElse(StrategyType.EXPECTED_VALUE);
+    StrategyType type =
+        StrategyType.fromKey(strategy)
+            .orElseGet(
+                () ->
+                    StrategyType.fromKey(gameProperties.strategy())
+                        .orElse(StrategyType.EXPECTED_VALUE));
     return apiMapper.toGameResultDto(automaticGameRunnerService.playGame(type));
   }
 
   @PostMapping("/play/batch")
   public BatchStatsDto playBatch(
-      @RequestParam(defaultValue = "3") @Min(1) @Max(500) int games,
+      @RequestParam(defaultValue = "2") @Min(1) @Max(500) int games,
       @RequestParam(required = false) String strategy) {
-    StrategyType type = StrategyType.fromKey(strategy).orElse(StrategyType.EXPECTED_VALUE);
+    StrategyType type =
+        StrategyType.fromKey(strategy)
+            .orElseGet(
+                () ->
+                    StrategyType.fromKey(gameProperties.strategy())
+                        .orElse(StrategyType.EXPECTED_VALUE));
     return apiMapper.toDto(automaticGameRunnerService.playBatch(games, type));
   }
 
@@ -53,7 +65,12 @@ public class AutomaticGameController {
   @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter streamGame(@RequestParam(required = false) String strategy) {
     SseEmitter emitter = new SseEmitter(120_000L);
-    StrategyType type = StrategyType.fromKey(strategy).orElse(StrategyType.EXPECTED_VALUE);
+    StrategyType type =
+        StrategyType.fromKey(strategy)
+            .orElseGet(
+                () ->
+                    StrategyType.fromKey(gameProperties.strategy())
+                        .orElse(StrategyType.EXPECTED_VALUE));
     batchExecutorService.submit(() -> automaticGameRunnerService.playGameStreaming(type, emitter));
     return emitter;
   }

@@ -40,7 +40,7 @@ public class LowRiskStrategy implements GameStrategy {
   public List<ShopItem> choosePurchases(List<ShopItem> shopItems, GameState state) {
     List<ShopItem> plan = new ArrayList<>();
 
-    if (state.getLives() <= properties.lowLivesThreshold() + 1) {
+    if (state.getLives() <= properties.lowLivesThreshold() + properties.extraLivesBuffer()) {
       shopItems.stream()
           .filter(ShopItem::isHealingPotion)
           .filter(i -> i.cost() <= properties.healingPotionMaxCost())
@@ -54,7 +54,7 @@ public class LowRiskStrategy implements GameStrategy {
     List<ShopItem> upgrades =
         shopItems.stream()
             .filter(item -> !item.isHealingPotion())
-            .sorted(Comparator.comparingInt(ShopItem::cost)) // cheapest first (risk-averse)
+            .sorted(Comparator.comparingInt(ShopItem::cost))
             .toList();
 
     for (ShopItem item : upgrades) {

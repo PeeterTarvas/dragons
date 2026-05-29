@@ -8,12 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bigbank.dragons.api.dto.AdDto;
-import com.bigbank.dragons.api.dto.BoardDto;
-import com.bigbank.dragons.api.dto.BuyResponseDto;
-import com.bigbank.dragons.api.dto.GameStateDto;
-import com.bigbank.dragons.api.dto.ShopItemDto;
-import com.bigbank.dragons.api.dto.SolveResponseDto;
+import com.bigbank.dragons.api.dto.*;
 import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.Board;
 import com.bigbank.dragons.domain.BuyResponse;
@@ -115,7 +110,7 @@ public class InteractiveGameControllerTest {
   }
 
   @Test
-  void buy_MapsDtoExecutesAndMapsResponse() {
+  void buyMapsDtoExecutesAndMapsResponse() {
     String gameId = "game-123";
     ShopItemDto requestDto = mock(ShopItemDto.class);
     ShopItem domainItem = mock(ShopItem.class);
@@ -130,5 +125,20 @@ public class InteractiveGameControllerTest {
 
     assertEquals(expectedDto, result);
     verify(service).buyItem(gameId, domainItem);
+  }
+
+  @Test
+  void stateMapsDtoExecutesAndMapsResponse() {
+    String gameId = "game-123";
+    GameState state = mock(GameState.class);
+    GameResultDto expectedDto = mock(GameResultDto.class);
+
+    when(service.getGameState(gameId)).thenReturn(state);
+    when(apiMapper.toGameResultDto(state)).thenReturn(expectedDto);
+
+    GameResultDto result = controller.state(gameId);
+
+    assertEquals(expectedDto, result);
+    verify(service).getGameState(gameId);
   }
 }

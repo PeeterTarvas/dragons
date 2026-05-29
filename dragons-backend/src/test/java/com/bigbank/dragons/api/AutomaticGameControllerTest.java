@@ -1,6 +1,8 @@
 package com.bigbank.dragons.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,16 +11,19 @@ import com.bigbank.dragons.api.dto.BatchStatsDto;
 import com.bigbank.dragons.api.dto.GameResultDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.BatchStats;
+import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.game.state.GameState;
 import com.bigbank.dragons.service.AutomaticGameRunnerService;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @ExtendWith(MockitoExtension.class)
 public class AutomaticGameControllerTest {
@@ -26,6 +31,8 @@ public class AutomaticGameControllerTest {
   @Mock private AutomaticGameRunnerService automaticGameRunnerService;
   @Mock private ApiMapper apiMapper;
   @Mock private StrategyRegistry strategyRegistry;
+  @Mock private GameProperties gameProperties;
+  @Mock private ExecutorService batchExecutorService;
 
   @InjectMocks private AutomaticGameController controller;
 
@@ -34,6 +41,7 @@ public class AutomaticGameControllerTest {
     GameState state = mock(GameState.class);
     GameResultDto expectedDto = mock(GameResultDto.class);
 
+    when(gameProperties.strategy()).thenReturn("EXPECTED_VALUE");
     when(automaticGameRunnerService.playGame(StrategyType.EXPECTED_VALUE)).thenReturn(state);
     when(apiMapper.toGameResultDto(state)).thenReturn(expectedDto);
 
@@ -48,6 +56,7 @@ public class AutomaticGameControllerTest {
     GameState state = mock(GameState.class);
     GameResultDto expectedDto = mock(GameResultDto.class);
 
+    when(gameProperties.strategy()).thenReturn("EXPECTED_VALUE");
     when(automaticGameRunnerService.playGame(StrategyType.EXPECTED_VALUE)).thenReturn(state);
     when(apiMapper.toGameResultDto(state)).thenReturn(expectedDto);
 
@@ -76,6 +85,7 @@ public class AutomaticGameControllerTest {
     BatchStats stats = mock(BatchStats.class);
     BatchStatsDto expectedDto = mock(BatchStatsDto.class);
 
+    when(gameProperties.strategy()).thenReturn("EXPECTED_VALUE");
     when(automaticGameRunnerService.playBatch(10, StrategyType.EXPECTED_VALUE)).thenReturn(stats);
     when(apiMapper.toDto(stats)).thenReturn(expectedDto);
 
@@ -107,5 +117,13 @@ public class AutomaticGameControllerTest {
     List<String> results = controller.strategies();
 
     assertEquals(List.of("expected-value", "low-risk"), results);
+  }
+
+  @Test
+  void streamGameWithValidStrategySubmitsTaskAndReturnsEmitter() {
+    SseEmitter result = controller.streamGame("low-risk");
+
+    assertNotNull(result);
+    verify(batchExecutorService).submit(any(Runnable.class));
   }
 }

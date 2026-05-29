@@ -1,23 +1,31 @@
 package com.bigbank.dragons.game.session;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.api.exception.GameNotFoundException;
+import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.game.state.GameState;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+@ExtendWith(MockitoExtension.class)
 public class GameSessionStoreTest {
 
+  @Mock private GameProperties properties;
   private GameSessionStore store;
   private GameState mockState;
 
   @BeforeEach
   void setUp() {
-    store = new GameSessionStore();
+    when(properties.sessionTtlMinutes()).thenReturn(30);
+    store = new GameSessionStore(properties);
     mockState = new GameState("game-123", 3, 0, 1, 0, 0, false);
   }
 

@@ -1,6 +1,7 @@
 package com.bigbank.dragons.strategy.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.domain.Message;
@@ -84,5 +85,26 @@ public class ExpectedValueStrategyTest {
     assertEquals(2, plan.size());
     assertEquals(expensiveUpgrade, plan.get(0));
     assertEquals(cheapUpgrade, plan.get(1));
+  }
+
+  @Test
+  void chooseAdThrowsWhenNoAdsAvailable() {
+    assertThrows(
+        IllegalStateException.class, () -> strategy.chooseAd(List.of(), gameState, estimator));
+  }
+
+  @Test
+  void choosePurchasesSkipsHealingWhenPotionExceedsMaxCost() {
+    when(properties.lowLivesThreshold()).thenReturn(3);
+    when(properties.healingPotionMaxCost()).thenReturn(50);
+    when(properties.goldReserve()).thenReturn(0);
+    when(gameState.getLives()).thenReturn(2);
+    when(gameState.getGold()).thenReturn(100);
+
+    ShopItem dearPotion = new ShopItem("p1", "Healing potion", 80); // > maxCost
+
+    List<ShopItem> plan = strategy.choosePurchases(List.of(dearPotion), gameState);
+
+    assertEquals(0, plan.size());
   }
 }

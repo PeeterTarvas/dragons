@@ -1,5 +1,6 @@
 package com.bigbank.dragons.strategy;
 
+import com.bigbank.dragons.game.config.GameProperties;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -10,16 +11,18 @@ import org.springframework.stereotype.Component;
 public class StrategyRegistry {
 
   private final Map<StrategyType, GameStrategy> byType = new EnumMap<>(StrategyType.class);
+  private final StrategyType defaultStrategy;
 
-  public StrategyRegistry(List<GameStrategy> strategies) {
+  public StrategyRegistry(List<GameStrategy> strategies, GameProperties properties) {
     for (GameStrategy s : strategies) {
       byType.put(s.type(), s);
     }
+    this.defaultStrategy =
+        StrategyType.fromKey(properties.strategy()).orElse(StrategyType.EXPECTED_VALUE);
   }
 
   public GameStrategy resolve(StrategyType type) {
-    return Optional.ofNullable(byType.get(type))
-        .orElseGet(() -> byType.get(StrategyType.EXPECTED_VALUE));
+    return Optional.ofNullable(byType.get(type)).orElseGet(() -> byType.get(defaultStrategy));
   }
 
   public List<StrategyType> available() {

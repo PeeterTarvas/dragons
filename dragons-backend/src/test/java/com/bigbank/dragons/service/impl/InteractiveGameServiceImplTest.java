@@ -89,6 +89,20 @@ public class InteractiveGameServiceImplTest {
   }
 
   @Test
+  void getBoardEmptyMessagesReturnsNoRecommendation() {
+    when(sessionStore.get("game-1")).thenReturn(mockSession);
+    when(taskService.getTasks("game-1")).thenReturn(List.of());
+
+    GameStrategy mockStrategy = mock(GameStrategy.class);
+    when(strategyRegistry.resolve(StrategyType.LOW_RISK)).thenReturn(mockStrategy);
+
+    Board result = service.getBoard("game-1", "low-risk");
+
+    assertEquals("", result.recommendedAdId());
+    assertEquals(0, result.messages().size());
+  }
+
+  @Test
   void getBoardWithInvalidStrategyThrowsException() {
     assertThrows(InvalidStrategyException.class, () -> service.getBoard("game-1", "invalid-key"));
   }
@@ -173,5 +187,36 @@ public class InteractiveGameServiceImplTest {
 
     assertEquals(response, result);
     verify(validator).validateGameIsActive(mockSession);
+  }
+
+  @Test
+  void getGameStateReturnsState() {
+    when(sessionStore.get("game-1")).thenReturn(mockSession);
+    when(mockSession.getState()).thenReturn(mockState);
+
+    GameState result = service.getGameState("game-1");
+
+    assertEquals(mockState, result);
+    verify(validator).validateGameIsActive(mockSession);
+  }
+
+  @Test
+  void solveAdBelowTargetMarksGoalNotReachedAndKeepsSession() {
+    Message ad = mock(Message.class);
+    SolveResponse solveResponse = mock(SolveResponse.class);
+
+    when(sessionStore.get("game-1")).thenReturn(mockSession);
+    when(mockSession.getState()).thenReturn(mockState);
+    when(mockSession.getEstimator()).thenReturn(mock(ProbabilityEstimator.class));
+    when(turnExecutor.execute(any(), any(), any())).thenReturn(solveResponse);
+    when(mockState.getScore()).thenReturn(500.0);
+    when(props.targetScore()).thenReturn(1000.0);
+    when(mockState.isAlive()).thenReturn(true);
+
+    SolveResponse result = service.solveAd("game-1", ad);
+
+    assertEquals(solveResponse, result);
+    verify(mockState).markReachedGoal(false);
+    verify(sessionStore, never()).remove("game-1");
   }
 }

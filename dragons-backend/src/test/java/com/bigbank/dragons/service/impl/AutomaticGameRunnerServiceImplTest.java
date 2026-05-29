@@ -3,18 +3,9 @@ package com.bigbank.dragons.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.game.config.GameProperties;
@@ -40,6 +31,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @ExtendWith(MockitoExtension.class)
 class AutomaticGameRunnerServiceImplTest {
@@ -52,6 +44,7 @@ class AutomaticGameRunnerServiceImplTest {
   @Mock private StrategyRegistry strategyRegistry;
   @Mock private TurnExecutor turnExecutor;
   @Mock private ExecutorService batchExecutorService;
+  @Mock private ApiMapper apiMapper;
 
   @Captor private ArgumentCaptor<Callable<GameState>> callableCaptor;
 
@@ -218,5 +211,83 @@ class AutomaticGameRunnerServiceImplTest {
     runnerService.playGame(StrategyType.EXPECTED_VALUE);
 
     verify(state).markReachedGoal(false);
+  }
+
+  @Test
+  void playGameStreamingCompletesSuccessfully() throws Exception {
+    SseEmitter emitter = mock(SseEmitter.class);
+
+    when(strategyRegistry.resolve(StrategyType.EXPECTED_VALUE)).thenReturn(strategy);
+    when(gameService.start()).thenReturn(state);
+    when(state.isAlive()).thenReturn(true, false);
+    when(props.maxTurns()).thenReturn(10);
+    when(state.getTurn()).thenReturn(0);
+    when(state.getGameId()).thenReturn("game-1");
+    when(state.getScore()).thenReturn(1200.0);
+    when(props.targetScore()).thenReturn(1000.0);
+
+    Message ad = mock(Message.class);
+    when(taskService.getTasks("game-1")).thenReturn(List.of(ad));
+    when(taskService.chooseTask(any(), eq(state), any(), eq(strategy))).thenReturn(ad);
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(turnExecutor).execute(eq(state), eq(ad), any());
+    verify(shopService, never()).shop(any(), any());
+    verify(state).markReachedGoal(true);
+    verify(emitter, atLeastOnce()).send(any(SseEmitter.SseEventBuilder.class));
+    verify(emitter).complete();
+  }
+
+  @Test
+  void playGameStreamingHandlesException() {
+    SseEmitter emitter = mock(SseEmitter.class);
+    when(gameService.start()).thenThrow(new RuntimeException("API error"));
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(emitter).completeWithError(any(RuntimeException.class));
+  }
+
+  @Test
+  void playGameStreamingShopsWhenStillAliveAfterTurn() {
+    SseEmitter emitter = mock(SseEmitter.class);
+    when(strategyRegistry.resolve(StrategyType.EXPECTED_VALUE)).thenReturn(strategy);
+    when(gameService.start()).thenReturn(state);
+    when(state.isAlive()).thenReturn(true, true, false);
+    when(props.maxTurns()).thenReturn(10);
+    when(state.getTurn()).thenReturn(0);
+    when(state.getGameId()).thenReturn("game-1");
+    when(state.getScore()).thenReturn(1200.0);
+    when(props.targetScore()).thenReturn(1000.0);
+
+    Message ad = mock(Message.class);
+    when(taskService.getTasks("game-1")).thenReturn(List.of(ad));
+    when(taskService.chooseTask(any(), eq(state), any(), eq(strategy))).thenReturn(ad);
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(shopService).shop(state, strategy);
+    verify(state).markReachedGoal(true);
+    verify(emitter).complete();
+  }
+
+  @Test
+  void playGameStreamingExitsAtMaxTurnsAndMarksGoalNotReached() {
+    SseEmitter emitter = mock(SseEmitter.class);
+    when(strategyRegistry.resolve(StrategyType.EXPECTED_VALUE)).thenReturn(strategy);
+    when(gameService.start()).thenReturn(state);
+    when(state.isAlive()).thenReturn(true);
+    when(props.maxTurns()).thenReturn(10);
+    when(state.getTurn()).thenReturn(10);
+    when(state.getGameId()).thenReturn("game-1");
+    when(state.getScore()).thenReturn(500.0);
+    when(props.targetScore()).thenReturn(1000.0);
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(taskService, never()).getTasks(anyString());
+    verify(state).markReachedGoal(false);
+    verify(emitter).complete();
   }
 }

@@ -82,4 +82,14 @@ public class AdDecoderTest {
     Message broken = new Message("not!!base64", "also!!not", 100, 5, 1, "bad");
     assertThrows(IllegalArgumentException.class, () -> decoder.decode(broken));
   }
+
+  @Test
+  void decodeRot13LeavesCharsOutsideLetterRangesUntouched() {
+    Message ad = new Message("a{b", "C[D", 1, 1, 2, "x");
+
+    Message decoded = decoder.decode(ad).orElseThrow();
+
+    assertEquals("n{o", decoded.adId());
+    assertEquals("P[Q", decoded.message());
+  }
 }
