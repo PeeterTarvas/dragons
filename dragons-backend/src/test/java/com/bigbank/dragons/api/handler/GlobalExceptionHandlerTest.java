@@ -1,26 +1,30 @@
 package com.bigbank.dragons.api.handler;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.api.exception.GameNotFoundException;
 import com.bigbank.dragons.api.exception.InvalidStrategyException;
 import com.bigbank.dragons.client.exception.MugloarApiException;
+import com.bigbank.dragons.client.exception.MugloarRateLimitException;
+import com.bigbank.dragons.client.exception.MugloarUnavailableException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.client.ResourceAccessException;
 
 public class GlobalExceptionHandlerTest {
 
@@ -144,5 +148,44 @@ public class GlobalExceptionHandlerTest {
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Game is already over", response.getBody().getDetail());
     assertEquals("Invalid game action", response.getBody().getTitle());
+  }
+
+  @Test
+  void handleRateLimitedReturns503WithRetryAfterHeader() {
+    GlobalExceptionHandler handler = new GlobalExceptionHandler();
+
+    ResponseEntity<ProblemDetail> response =
+        handler.handleRateLimited(new MugloarRateLimitException("429", Duration.ofSeconds(5)));
+
+    assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+    assertEquals("5", response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER));
+    assertEquals(5L, response.getBody().getProperties().get("retryAfterSeconds"));
+  }
+
+  @Test
+  void handleRateLimitedWithoutRetryAfterOmitsHeader() {
+    GlobalExceptionHandler handler = new GlobalExceptionHandler();
+
+    ResponseEntity<ProblemDetail> response =
+        handler.handleRateLimited(new MugloarRateLimitException("429", null));
+
+    assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+    assertNull(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER));
+  }
+
+  @Test
+  void handleUpstreamUnavailableReturns503() {
+    GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    assertEquals(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        handler.handleUpstreamUnavailable(new MugloarUnavailableException("down")).getStatusCode());
+  }
+
+  @Test
+  void handleTransportReturns502() {
+    GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    assertEquals(
+        HttpStatus.BAD_GATEWAY,
+        handler.handleTransport(new ResourceAccessException("timeout")).getStatusCode());
   }
 }

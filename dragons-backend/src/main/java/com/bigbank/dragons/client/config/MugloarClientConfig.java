@@ -23,6 +23,7 @@ public class MugloarClientConfig {
     return RestClient.builder()
         .baseUrl(properties.baseUrl())
         .requestFactory(requestFactory)
+        .defaultStatusHandler(new MugloarResponseErrorHandler())
         .build();
   }
 }

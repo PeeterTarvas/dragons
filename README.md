@@ -1,6 +1,5 @@
 TODO:
 more unit testing FE
-1 unhandled error cases  429 from downstream service
 
 if backend isnt up for frontend then currently throws 500: Http failure response for http://localhost:4200/api/games/0ow95tBD/solve: 500 Internal Server Error
 5:14:05 PM [vite] http proxy error: /api/games/0ow95tBD/solve

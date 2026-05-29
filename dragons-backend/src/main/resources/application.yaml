@@ -9,6 +9,8 @@ mugloar:
   max-attempts: 4
   initial-backoff-ms: 500
   multiplier: 2
+  retry-jitter-ms: 200
+
 
 springdoc:
   api-docs:

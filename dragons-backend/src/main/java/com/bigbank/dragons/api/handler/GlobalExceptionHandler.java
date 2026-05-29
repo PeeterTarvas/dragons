@@ -3,18 +3,22 @@ package com.bigbank.dragons.api.handler;
 import com.bigbank.dragons.api.exception.GameNotFoundException;
 import com.bigbank.dragons.api.exception.InvalidStrategyException;
 import com.bigbank.dragons.client.exception.MugloarApiException;
+import com.bigbank.dragons.client.exception.MugloarRateLimitException;
+import com.bigbank.dragons.client.exception.MugloarUnavailableException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientException;
 
 @Slf4j
 @RestControllerAdvice
@@ -105,6 +109,44 @@ public class GlobalExceptionHandler {
     pd.setProperty("timestamp", Instant.now());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
+  }
+
+  @ExceptionHandler(MugloarRateLimitException.class)
+  public ResponseEntity<ProblemDetail> handleRateLimited(MugloarRateLimitException ex) {
+    ProblemDetail pd =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "The game service is rate limiting requests. Please retry shortly.");
+    pd.setTitle("Upstream rate limited");
+    pd.setProperty("timestamp", Instant.now());
+
+    ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+    if (ex.getRetryAfter() != null) {
+      long seconds = Math.max(0, ex.getRetryAfter().toSeconds());
+      pd.setProperty("retryAfterSeconds", seconds);
+      builder.header(HttpHeaders.RETRY_AFTER, Long.toString(seconds));
+    }
+    return builder.body(pd);
+  }
+
+  @ExceptionHandler(MugloarUnavailableException.class)
+  public ResponseEntity<ProblemDetail> handleUpstreamUnavailable(MugloarUnavailableException ex) {
+    ProblemDetail pd =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.SERVICE_UNAVAILABLE, "The game service is temporarily unavailable.");
+    pd.setTitle("Upstream unavailable");
+    pd.setProperty("timestamp", Instant.now());
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(pd);
+  }
+
+  @ExceptionHandler(RestClientException.class)
+  public ResponseEntity<ProblemDetail> handleTransport(RestClientException ex) {
+    ProblemDetail pd =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_GATEWAY, "Could not reach the game service: " + ex.getMessage());
+    pd.setTitle("Upstream connection error");
+    pd.setProperty("timestamp", Instant.now());
+    return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(pd);
   }
 
   private static Violation toViolation(ConstraintViolation<?> v) {

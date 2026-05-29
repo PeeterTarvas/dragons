@@ -104,6 +104,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
           shopService.shop(state, strategy);
         }
         sendState(emitter, state);
+        // No good solution here really
         Thread.sleep(100);
       }
 

@@ -17,5 +17,6 @@ import org.springframework.web.client.HttpServerErrorException;
     },
     maxRetriesString = "${mugloar.max-attempts}",
     delayString = "${mugloar.initial-backoff-ms}",
+    jitterString = "${mugloar.retry-jitter-ms}",
     multiplier = 2)
 public @interface MugloarRetry {}
