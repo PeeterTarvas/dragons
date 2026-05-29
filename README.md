@@ -1,7 +1,9 @@
 TODO:
 more unit testing FE
-readme
-AutoPlay FE
 Docker
-final review
 API documentation
+final review
+readme
+
+
+AutoPlay FE - maybe will get there
