@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:dragons-ui": "node dist/dragons-ui/server/server.mjs",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
@@ -37,8 +38,11 @@
     "@types/node": "^20.17.19",
     "angular-eslint": "21.4.0",
     "eslint": "^10.3.0",
+    "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
-    "typescript-eslint": "8.59.2"
+    "typescript-eslint": "8.59.2",
+    "vitest": "^4.1.7"
   }
 }

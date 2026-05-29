@@ -1,4 +1,3 @@
-import {TurnLog} from './turn-log.model';
 
 export interface GameState {
   gameId: string;

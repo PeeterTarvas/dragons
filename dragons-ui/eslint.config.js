@@ -3,6 +3,7 @@ const eslint = require('@eslint/js');
 const { defineConfig } = require('eslint/config');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
+const globals = require('globals');
 
 module.exports = defineConfig([
   {
@@ -35,7 +36,18 @@ module.exports = defineConfig([
   },
   {
     files: ['**/*.html'],
-    extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
+    extends: [
+      ...angular.configs.templateRecommended,
+      ...angular.configs.templateAccessibility
+    ],
     rules: {},
   },
+  {
+    files: ['**/*.spec.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.jasmine,
+      },
+    },
+  }
 ]);
