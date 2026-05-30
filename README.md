@@ -1,9 +1,11 @@
 TODO:
-more unit testing FE
 Docker
-API documentation
 final review
 readme
 
 
 AutoPlay FE - maybe will get there
+more unit testing FE + be
+
+
+turn log can cause ram buildup

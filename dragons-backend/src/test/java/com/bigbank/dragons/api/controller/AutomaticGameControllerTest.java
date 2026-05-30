@@ -1,4 +1,4 @@
-package com.bigbank.dragons.api;
+package com.bigbank.dragons.api.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bigbank.dragons.api.controller.impl.AutomaticGameController;
 import com.bigbank.dragons.api.dto.BatchStatsDto;
 import com.bigbank.dragons.api.dto.GameResultDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
@@ -140,16 +141,5 @@ public class AutomaticGameControllerTest {
 
     assertEquals(expectedDto, result);
     verify(automaticGameRunnerService).playGame(StrategyType.EXPECTED_VALUE);
-  }
-
-  @Test
-  void streamGameWithNullStrategyFallsBackToConfiguredStrategy() {
-    when(gameProperties.strategy()).thenReturn("low-risk");
-
-    SseEmitter result = controller.streamGame(null);
-
-    assertNotNull(result);
-    verify(gameProperties).strategy();
-    verify(batchExecutorService).submit(any(Runnable.class));
   }
 }

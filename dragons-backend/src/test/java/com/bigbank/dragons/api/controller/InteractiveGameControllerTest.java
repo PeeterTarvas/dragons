@@ -1,4 +1,4 @@
-package com.bigbank.dragons.api;
+package com.bigbank.dragons.api.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.anyString;
@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bigbank.dragons.api.controller.impl.InteractiveGameController;
 import com.bigbank.dragons.api.dto.AdDto;
 import com.bigbank.dragons.api.dto.BoardDto;
 import com.bigbank.dragons.api.dto.BuyResponseDto;
