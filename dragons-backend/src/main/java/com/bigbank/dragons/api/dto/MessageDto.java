@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
 @Schema(description = "A single message (ad / task) from the message board")
-public record AdDto(
+public record MessageDto(
     @NotBlank @Schema(description = "Unique ID of the message", example = "a1b2c3") String adId,
     @NotBlank
         @Schema(description = "Free-text description of the task", example = "Help the villagers")

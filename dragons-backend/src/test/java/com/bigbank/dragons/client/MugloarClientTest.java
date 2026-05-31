@@ -31,18 +31,26 @@ class MugloarClientTest {
 
   @Test
   void startGameSuccessReturnsDto() {
-    StartGameResponseDto expected = mock(StartGameResponseDto.class);
-    when(restClient.post().uri("/api/v2/game/start").retrieve().body(StartGameResponseDto.class))
+    StartGameResponseClientDto expected = mock(StartGameResponseClientDto.class);
+    when(restClient
+            .post()
+            .uri("/api/v2/game/start")
+            .retrieve()
+            .body(StartGameResponseClientDto.class))
         .thenReturn(expected);
 
-    StartGameResponseDto result = client.startGame();
+    StartGameResponseClientDto result = client.startGame();
 
     assertEquals(expected, result);
   }
 
   @Test
   void startGameEmptyBodyThrowsException() {
-    when(restClient.post().uri("/api/v2/game/start").retrieve().body(StartGameResponseDto.class))
+    when(restClient
+            .post()
+            .uri("/api/v2/game/start")
+            .retrieve()
+            .body(StartGameResponseClientDto.class))
         .thenReturn(null);
 
     MugloarApiException ex = assertThrows(MugloarApiException.class, () -> client.startGame());
@@ -62,15 +70,15 @@ class MugloarClientTest {
 
   @Test
   void investigateSuccessReturnsDto() {
-    ReputationDto expected = mock(ReputationDto.class);
+    ReputationClientDto expected = mock(ReputationClientDto.class);
     when(restClient
             .post()
             .uri("/api/v2/{gameId}/investigate/reputation", "game123")
             .retrieve()
-            .body(ReputationDto.class))
+            .body(ReputationClientDto.class))
         .thenReturn(expected);
 
-    ReputationDto result = client.investigate("game123");
+    ReputationClientDto result = client.investigate("game123");
 
     assertEquals(expected, result);
   }
@@ -81,7 +89,7 @@ class MugloarClientTest {
             .post()
             .uri("/api/v2/{gameId}/investigate/reputation", "game123")
             .retrieve()
-            .body(ReputationDto.class))
+            .body(ReputationClientDto.class))
         .thenReturn(null);
 
     MugloarApiException ex =
@@ -103,7 +111,7 @@ class MugloarClientTest {
   @Test
   @SuppressWarnings("unchecked")
   void getMessagesSuccessReturnsList() {
-    List<MessageDto> expected = List.of(mock(MessageDto.class));
+    List<MessageClientDto> expected = List.of(mock(MessageClientDto.class));
     when(restClient
             .get()
             .uri("/api/v2/{gameId}/messages", "game123")
@@ -111,7 +119,7 @@ class MugloarClientTest {
             .body(any(ParameterizedTypeReference.class)))
         .thenReturn(expected);
 
-    List<MessageDto> result = client.getMessages("game123");
+    List<MessageClientDto> result = client.getMessages("game123");
 
     assertEquals(expected, result);
   }
@@ -154,15 +162,15 @@ class MugloarClientTest {
 
   @Test
   void solveSuccessReturnsDto() {
-    SolveResponseDto expected = mock(SolveResponseDto.class);
+    SolveResponseClientDto expected = mock(SolveResponseClientDto.class);
     when(restClient
             .post()
             .uri("/api/v2/{gameId}/solve/{adId}", "game123", "ad123")
             .retrieve()
-            .body(SolveResponseDto.class))
+            .body(SolveResponseClientDto.class))
         .thenReturn(expected);
 
-    SolveResponseDto result = client.solve("game123", "ad123");
+    SolveResponseClientDto result = client.solve("game123", "ad123");
 
     assertEquals(expected, result);
   }
@@ -173,7 +181,7 @@ class MugloarClientTest {
             .post()
             .uri("/api/v2/{gameId}/solve/{adId}", "game123", "ad123")
             .retrieve()
-            .body(SolveResponseDto.class))
+            .body(SolveResponseClientDto.class))
         .thenReturn(null);
 
     MugloarApiException ex =
@@ -195,7 +203,7 @@ class MugloarClientTest {
   @Test
   @SuppressWarnings("unchecked")
   void getShopSuccessReturnsList() {
-    List<ShopItemDto> expected = List.of(mock(ShopItemDto.class));
+    List<ShopItemClientDto> expected = List.of(mock(ShopItemClientDto.class));
     when(restClient
             .get()
             .uri("/api/v2/{gameId}/shop", "game123")
@@ -203,7 +211,7 @@ class MugloarClientTest {
             .body(any(ParameterizedTypeReference.class)))
         .thenReturn(expected);
 
-    List<ShopItemDto> result = client.getShop("game123");
+    List<ShopItemClientDto> result = client.getShop("game123");
 
     assertEquals(expected, result);
   }

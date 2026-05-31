@@ -1,6 +1,6 @@
 package com.bigbank.dragons.client.dto;
 
-public record SolveResponseDto(
+public record SolveResponseClientDto(
     Boolean success,
     Integer lives,
     Integer gold,

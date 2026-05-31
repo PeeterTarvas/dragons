@@ -6,15 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.bigbank.dragons.api.dto.AdDto;
-import com.bigbank.dragons.api.dto.BatchStatsDto;
-import com.bigbank.dragons.api.dto.BoardDto;
-import com.bigbank.dragons.api.dto.BuyResponseDto;
-import com.bigbank.dragons.api.dto.GameResultDto;
-import com.bigbank.dragons.api.dto.GameStateDto;
-import com.bigbank.dragons.api.dto.ShopItemDto;
-import com.bigbank.dragons.api.dto.SolveResponseDto;
-import com.bigbank.dragons.api.dto.TurnLogDto;
+import com.bigbank.dragons.api.dto.*;
 import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.domain.Board;
 import com.bigbank.dragons.domain.BuyResponse;
@@ -165,12 +157,12 @@ public class ApiMapperTest {
 
   @Test
   void toDomainAdDtoReturnsNullWhenInputIsNull() {
-    assertNull(mapper.toDomain((AdDto) null));
+    assertNull(mapper.toDomain((MessageDto) null));
   }
 
   @Test
   void toDomainAdDtoMapsAllFieldsAndIgnoresEstimatedSuccess() {
-    AdDto dto = new AdDto("ad-1", "Fight a dragon", 500, 3, "Risky", 0, 0.35);
+    MessageDto dto = new MessageDto("ad-1", "Fight a dragon", 500, 3, "Risky", 0, 0.35);
     Message domain = mapper.toDomain(dto);
     assertEquals("ad-1", domain.adId());
     assertEquals("Fight a dragon", domain.message());
@@ -213,7 +205,7 @@ public class ApiMapperTest {
   void toAdDtoMapsAllFieldsFromInnerMessage() {
     Message msg = new Message("ad-2", "Deliver goods", 200, 4, 1, "Quite likely");
     EvaluatedMessage em = new EvaluatedMessage(msg, 0.7);
-    AdDto dto = mapper.toAdDto(em);
+    MessageDto dto = mapper.toAdDto(em);
     assertEquals("ad-2", dto.adId());
     assertEquals("Deliver goods", dto.message());
     assertEquals(200, dto.reward());
@@ -226,7 +218,7 @@ public class ApiMapperTest {
   @Test
   void toAdDtoReturnsNullFieldsWhenInnerMessageIsNull() {
     EvaluatedMessage em = new EvaluatedMessage(null, 0.5);
-    AdDto dto = mapper.toAdDto(em);
+    MessageDto dto = mapper.toAdDto(em);
     assertNotNull(dto);
     assertNull(dto.adId());
     assertNull(dto.message());

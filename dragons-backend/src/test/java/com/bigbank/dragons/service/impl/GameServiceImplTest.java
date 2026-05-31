@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.client.MugloarClient;
-import com.bigbank.dragons.client.dto.StartGameResponseDto;
+import com.bigbank.dragons.client.dto.StartGameResponseClientDto;
 import com.bigbank.dragons.client.mapper.GameStateMapper;
 import com.bigbank.dragons.game.state.GameState;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ public class GameServiceImplTest {
 
   @Test
   void startShouldReturnMappedGameState() {
-    StartGameResponseDto mockDto = mock(StartGameResponseDto.class);
+    StartGameResponseClientDto mockDto = mock(StartGameResponseClientDto.class);
     GameState mockState = mock(GameState.class);
 
     when(client.startGame()).thenReturn(mockDto);

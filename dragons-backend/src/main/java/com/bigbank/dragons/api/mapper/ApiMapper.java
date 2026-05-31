@@ -22,7 +22,7 @@ public interface ApiMapper {
 
   ShopItem toDomain(ShopItemDto shopItemDto);
 
-  Message toDomain(AdDto adDto);
+  Message toDomain(MessageDto messageDto);
 
   @Mapping(source = "messages", target = "ads")
   BoardDto toDto(Board board);
@@ -33,7 +33,7 @@ public interface ApiMapper {
   @Mapping(source = "message.expiresIn", target = "expiresIn")
   @Mapping(source = "message.probability", target = "probability")
   @Mapping(source = "message.encrypted", target = "encrypted")
-  AdDto toAdDto(EvaluatedMessage domain);
+  MessageDto toAdDto(EvaluatedMessage domain);
 
   @Mapping(source = ".", target = "gameStateDto")
   GameResultDto toGameResultDto(GameState gameState);

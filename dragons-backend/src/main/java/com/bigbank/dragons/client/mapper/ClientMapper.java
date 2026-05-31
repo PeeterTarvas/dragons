@@ -1,10 +1,6 @@
 package com.bigbank.dragons.client.mapper;
 
-import com.bigbank.dragons.client.dto.BuyResponseClientDto;
-import com.bigbank.dragons.client.dto.MessageDto;
-import com.bigbank.dragons.client.dto.ReputationDto;
-import com.bigbank.dragons.client.dto.ShopItemDto;
-import com.bigbank.dragons.client.dto.SolveResponseDto;
+import com.bigbank.dragons.client.dto.*;
 import com.bigbank.dragons.domain.BuyResponse;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.domain.Reputation;
@@ -14,15 +10,15 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface ClientMapper {
-  Message toDomain(MessageDto dto);
+  Message toDomain(MessageClientDto dto);
 
-  Reputation toDomain(ReputationDto dto);
+  Reputation toDomain(ReputationClientDto dto);
 
-  ShopItem toDomain(ShopItemDto dto);
+  ShopItem toDomain(ShopItemClientDto dto);
 
   BuyResponse toDomain(BuyResponseClientDto dto);
 
-  SolveResponse toDomain(SolveResponseDto dto);
+  SolveResponse toDomain(SolveResponseClientDto dto);
 
-  ReputationDto toDto(Reputation investigate);
+  ReputationClientDto toDto(Reputation investigate);
 }

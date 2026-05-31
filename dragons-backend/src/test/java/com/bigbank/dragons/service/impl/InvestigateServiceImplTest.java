@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.client.MugloarClient;
-import com.bigbank.dragons.client.dto.ReputationDto;
+import com.bigbank.dragons.client.dto.ReputationClientDto;
 import com.bigbank.dragons.client.mapper.ClientMapper;
 import com.bigbank.dragons.domain.Reputation;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ public class InvestigateServiceImplTest {
   @Test
   void investigate_ShouldReturnReputation() {
     String gameId = "game-123";
-    ReputationDto mockDto = mock(ReputationDto.class);
+    ReputationClientDto mockDto = mock(ReputationClientDto.class);
     Reputation mockReputation = mock(Reputation.class);
 
     when(mugloarClient.investigate(gameId)).thenReturn(mockDto);

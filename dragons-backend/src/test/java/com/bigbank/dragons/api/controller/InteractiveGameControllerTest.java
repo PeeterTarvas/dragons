@@ -9,13 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.api.controller.impl.InteractiveGameController;
-import com.bigbank.dragons.api.dto.AdDto;
-import com.bigbank.dragons.api.dto.BoardDto;
-import com.bigbank.dragons.api.dto.BuyResponseDto;
-import com.bigbank.dragons.api.dto.GameResultDto;
-import com.bigbank.dragons.api.dto.GameStateDto;
-import com.bigbank.dragons.api.dto.ShopItemDto;
-import com.bigbank.dragons.api.dto.SolveResponseDto;
+import com.bigbank.dragons.api.dto.*;
 import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.Board;
 import com.bigbank.dragons.domain.BuyResponse;
@@ -86,7 +80,7 @@ public class InteractiveGameControllerTest {
   @Test
   void solveMapsDtoExecutesAndMapsResponse() {
     String gameId = "game-123";
-    AdDto requestDto = mock(AdDto.class);
+    MessageDto requestDto = mock(MessageDto.class);
     Message domainMessage = mock(Message.class);
     SolveResponse solveResponse = mock(SolveResponse.class);
     SolveResponseDto expectedDto = mock(SolveResponseDto.class);

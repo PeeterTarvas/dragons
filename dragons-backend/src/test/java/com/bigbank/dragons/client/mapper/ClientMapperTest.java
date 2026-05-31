@@ -4,11 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.bigbank.dragons.client.dto.BuyResponseClientDto;
-import com.bigbank.dragons.client.dto.MessageDto;
-import com.bigbank.dragons.client.dto.ReputationDto;
-import com.bigbank.dragons.client.dto.ShopItemDto;
-import com.bigbank.dragons.client.dto.SolveResponseDto;
+import com.bigbank.dragons.client.dto.*;
 import com.bigbank.dragons.domain.BuyResponse;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.domain.Reputation;
@@ -28,12 +24,12 @@ public class ClientMapperTest {
 
   @Test
   void toDomainMessageDtoReturnsNullWhenInputIsNull() {
-    assertNull(mapper.toDomain((MessageDto) null));
+    assertNull(mapper.toDomain((MessageClientDto) null));
   }
 
   @Test
   void toDomainMessageDtoMapsAllFields() {
-    MessageDto dto = new MessageDto("ad-1", "Fight the king", 300, 5, 2, "Risky");
+    MessageClientDto dto = new MessageClientDto("ad-1", "Fight the king", 300, 5, 2, "Risky");
     Message domain = mapper.toDomain(dto);
     assertEquals("ad-1", domain.adId());
     assertEquals("Fight the king", domain.message());
@@ -45,19 +41,19 @@ public class ClientMapperTest {
 
   @Test
   void toDomainMessageDtoMapsNullEncryptedField() {
-    MessageDto dto = new MessageDto("ad-2", "Plain task", 100, 3, null, "Sure thing");
+    MessageClientDto dto = new MessageClientDto("ad-2", "Plain task", 100, 3, null, "Sure thing");
     Message domain = mapper.toDomain(dto);
     assertNull(domain.encrypted());
   }
 
   @Test
   void toDomainReputationDtoReturnsNullWhenInputIsNull() {
-    assertNull(mapper.toDomain((ReputationDto) null));
+    assertNull(mapper.toDomain((ReputationClientDto) null));
   }
 
   @Test
   void toDomainReputationDtoMapsAllFields() {
-    ReputationDto dto = new ReputationDto(0.8, -0.3, 0.5);
+    ReputationClientDto dto = new ReputationClientDto(0.8, -0.3, 0.5);
     Reputation domain = mapper.toDomain(dto);
     assertEquals(0.8, domain.people());
     assertEquals(-0.3, domain.state());
@@ -66,12 +62,12 @@ public class ClientMapperTest {
 
   @Test
   void toDomainShopItemDtoReturnsNullWhenInputIsNull() {
-    assertNull(mapper.toDomain((ShopItemDto) null));
+    assertNull(mapper.toDomain((ShopItemClientDto) null));
   }
 
   @Test
   void toDomainShopItemDtoMapsAllFields() {
-    ShopItemDto dto = new ShopItemDto("item-1", "Healing Potion", 50);
+    ShopItemClientDto dto = new ShopItemClientDto("item-1", "Healing Potion", 50);
     ShopItem domain = mapper.toDomain(dto);
     assertEquals("item-1", domain.id());
     assertEquals("Healing Potion", domain.name());
@@ -96,12 +92,13 @@ public class ClientMapperTest {
 
   @Test
   void toDomainSolveResponseDtoReturnsNullWhenInputIsNull() {
-    assertNull(mapper.toDomain((SolveResponseDto) null));
+    assertNull(mapper.toDomain((SolveResponseClientDto) null));
   }
 
   @Test
   void toDomainSolveResponseDtoMapsAllFieldsPreservingDoubleScoreAndHighScore() {
-    SolveResponseDto dto = new SolveResponseDto(true, 2, 150, 1500.5, 3000.75, 10, "Excellent!");
+    SolveResponseClientDto dto =
+        new SolveResponseClientDto(true, 2, 150, 1500.5, 3000.75, 10, "Excellent!");
     SolveResponse domain = mapper.toDomain(dto);
     assertTrue(domain.success());
     assertEquals(2, domain.lives());
@@ -120,7 +117,7 @@ public class ClientMapperTest {
   @Test
   void toDtoReputationMapsAllNonNullFields() {
     Reputation domain = new Reputation(0.7, -0.2, 0.4);
-    ReputationDto dto = mapper.toDto(domain);
+    ReputationClientDto dto = mapper.toDto(domain);
     assertEquals(0.7, dto.people());
     assertEquals(-0.2, dto.state());
     assertEquals(0.4, dto.underworld());
@@ -129,7 +126,7 @@ public class ClientMapperTest {
   @Test
   void toDtoReputationDefaultsPeopleToZeroWhenNull() {
     Reputation domain = new Reputation(null, 0.5, 0.3);
-    ReputationDto dto = mapper.toDto(domain);
+    ReputationClientDto dto = mapper.toDto(domain);
     assertEquals(0.0, dto.people());
     assertEquals(0.5, dto.state());
     assertEquals(0.3, dto.underworld());
@@ -138,7 +135,7 @@ public class ClientMapperTest {
   @Test
   void toDtoReputationDefaultsStateToZeroWhenNull() {
     Reputation domain = new Reputation(0.5, null, 0.3);
-    ReputationDto dto = mapper.toDto(domain);
+    ReputationClientDto dto = mapper.toDto(domain);
     assertEquals(0.5, dto.people());
     assertEquals(0.0, dto.state());
     assertEquals(0.3, dto.underworld());
@@ -147,7 +144,7 @@ public class ClientMapperTest {
   @Test
   void toDtoReputationDefaultsUnderworldToZeroWhenNull() {
     Reputation domain = new Reputation(0.5, 0.3, null);
-    ReputationDto dto = mapper.toDto(domain);
+    ReputationClientDto dto = mapper.toDto(domain);
     assertEquals(0.5, dto.people());
     assertEquals(0.3, dto.state());
     assertEquals(0.0, dto.underworld());

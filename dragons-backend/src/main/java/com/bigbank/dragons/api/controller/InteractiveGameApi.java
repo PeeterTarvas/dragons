@@ -85,7 +85,7 @@ public interface InteractiveGameApi {
   SolveResponseDto solve(
       @Parameter(description = "Unique game ID", example = "mAg6juyHkfBp") @PathVariable @NotBlank
           String gameId,
-      @Valid @RequestBody AdDto ad);
+      @Valid @RequestBody MessageDto ad);
 
   @Operation(summary = "List shop items", description = "Returns the items available to purchase.")
   @ApiResponse(

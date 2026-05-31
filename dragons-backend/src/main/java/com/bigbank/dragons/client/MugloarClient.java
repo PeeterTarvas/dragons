@@ -19,39 +19,43 @@ public class MugloarClient {
 
   private final RestClient restClient;
 
-  public StartGameResponseDto startGame() {
+  public StartGameResponseClientDto startGame() {
     return Optional.ofNullable(
-            restClient.post().uri("/api/v2/game/start").retrieve().body(StartGameResponseDto.class))
+            restClient
+                .post()
+                .uri("/api/v2/game/start")
+                .retrieve()
+                .body(StartGameResponseClientDto.class))
         .orElseThrow(() -> new MugloarApiException("Start game returned an empty response"));
   }
 
-  public ReputationDto investigate(String gameId) {
+  public ReputationClientDto investigate(String gameId) {
     requireNotBlank(gameId, "gameId");
     return Optional.ofNullable(
             restClient
                 .post()
                 .uri("/api/v2/{gameId}/investigate/reputation", gameId)
                 .retrieve()
-                .body(ReputationDto.class))
+                .body(ReputationClientDto.class))
         .orElseThrow(
             () ->
                 new MugloarApiException(
                     "Investigation returned an empty response for game " + gameId));
   }
 
-  public List<MessageDto> getMessages(String gameId) {
+  public List<MessageClientDto> getMessages(String gameId) {
     requireNotBlank(gameId, "gameId");
     return Optional.ofNullable(
             restClient
                 .get()
                 .uri("/api/v2/{gameId}/messages", gameId)
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<MessageDto>>() {}))
+                .body(new ParameterizedTypeReference<List<MessageClientDto>>() {}))
         .orElseThrow(
             () -> new MugloarApiException("Messageboard returned no body for game " + gameId));
   }
 
-  public SolveResponseDto solve(String gameId, String adId) {
+  public SolveResponseClientDto solve(String gameId, String adId) {
     requireNotBlank(gameId, "gameId");
     requireNotBlank(adId, "adId");
     return Optional.ofNullable(
@@ -59,19 +63,19 @@ public class MugloarClient {
                 .post()
                 .uri("/api/v2/{gameId}/solve/{adId}", gameId, adId)
                 .retrieve()
-                .body(SolveResponseDto.class))
+                .body(SolveResponseClientDto.class))
         .orElseThrow(
             () -> new MugloarApiException("Solve returned an empty response for ad " + adId));
   }
 
-  public List<ShopItemDto> getShop(String gameId) {
+  public List<ShopItemClientDto> getShop(String gameId) {
     requireNotBlank(gameId, "gameId");
     return Optional.ofNullable(
             restClient
                 .get()
                 .uri("/api/v2/{gameId}/shop", gameId)
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<ShopItemDto>>() {}))
+                .body(new ParameterizedTypeReference<List<ShopItemClientDto>>() {}))
         .orElseThrow(() -> new MugloarApiException("Shop returned no items for game " + gameId));
   }
 

@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.client.MugloarClient;
 import com.bigbank.dragons.client.dto.BuyResponseClientDto;
-import com.bigbank.dragons.client.dto.ShopItemDto;
+import com.bigbank.dragons.client.dto.ShopItemClientDto;
 import com.bigbank.dragons.client.mapper.ClientMapper;
 import com.bigbank.dragons.domain.BuyResponse;
 import com.bigbank.dragons.domain.ShopItem;
@@ -50,7 +50,7 @@ public class ShopServiceImplTest {
     ShopItem item1 = new ShopItem("1", "Potion", 50);
     ShopItem item2 = new ShopItem("2", "Expensive Shield", 500);
 
-    ShopItemDto itemDto = mock(ShopItemDto.class);
+    ShopItemClientDto itemDto = mock(ShopItemClientDto.class);
     BuyResponseClientDto buyDto = mock(BuyResponseClientDto.class);
 
     when(state.getGameId()).thenReturn("game-id");
@@ -117,7 +117,7 @@ public class ShopServiceImplTest {
     GameStrategy strategy = mock(GameStrategy.class);
     ShopItem item = new ShopItem("1", "Potion", 50);
 
-    ShopItemDto itemDto = mock(ShopItemDto.class);
+    ShopItemClientDto itemDto = mock(ShopItemClientDto.class);
     BuyResponseClientDto buyDto = mock(BuyResponseClientDto.class);
 
     when(state.getGameId()).thenReturn("game-id");

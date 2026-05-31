@@ -1,13 +1,7 @@
 package com.bigbank.dragons.api.controller.impl;
 
 import com.bigbank.dragons.api.controller.InteractiveGameApi;
-import com.bigbank.dragons.api.dto.AdDto;
-import com.bigbank.dragons.api.dto.BoardDto;
-import com.bigbank.dragons.api.dto.BuyResponseDto;
-import com.bigbank.dragons.api.dto.GameResultDto;
-import com.bigbank.dragons.api.dto.GameStateDto;
-import com.bigbank.dragons.api.dto.ShopItemDto;
-import com.bigbank.dragons.api.dto.SolveResponseDto;
+import com.bigbank.dragons.api.dto.*;
 import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.Board;
 import com.bigbank.dragons.service.InteractiveGameService;
@@ -40,7 +34,7 @@ public class InteractiveGameController implements InteractiveGameApi {
   }
 
   @Override
-  public SolveResponseDto solve(String gameId, AdDto ad) {
+  public SolveResponseDto solve(String gameId, MessageDto ad) {
     return apiMapper.toDto(service.solveAd(gameId, apiMapper.toDomain(ad)));
   }
 

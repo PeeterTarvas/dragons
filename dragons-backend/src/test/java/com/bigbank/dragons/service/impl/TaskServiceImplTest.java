@@ -7,8 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.client.MugloarClient;
-import com.bigbank.dragons.client.dto.MessageDto;
-import com.bigbank.dragons.client.dto.SolveResponseDto;
+import com.bigbank.dragons.client.dto.MessageClientDto;
+import com.bigbank.dragons.client.dto.SolveResponseClientDto;
 import com.bigbank.dragons.client.mapper.ClientMapper;
 import com.bigbank.dragons.decoder.AdDecoder;
 import com.bigbank.dragons.domain.Message;
@@ -40,7 +40,7 @@ class TaskServiceImplTest {
   @Test
   void getTasksShouldReturnFlatMappedDecodedMessages() {
     String gameId = "game-id";
-    MessageDto dto = mock(MessageDto.class);
+    MessageClientDto dto = mock(MessageClientDto.class);
     Message domainMsg = mock(Message.class);
     Message decodedMsg = mock(Message.class);
 
@@ -95,7 +95,7 @@ class TaskServiceImplTest {
     GameState state = mock(GameState.class);
     Message ad = new Message("ad-id", "1", 1, 1, 0, "0.9");
     Message decoded = mock(Message.class);
-    SolveResponseDto resDto = mock(SolveResponseDto.class);
+    SolveResponseClientDto resDto = mock(SolveResponseClientDto.class);
     SolveResponse expectedResponse = mock(SolveResponse.class);
 
     when(state.getGameId()).thenReturn("game-id");
