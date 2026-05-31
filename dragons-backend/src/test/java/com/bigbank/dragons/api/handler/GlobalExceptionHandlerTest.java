@@ -188,4 +188,11 @@ public class GlobalExceptionHandlerTest {
         HttpStatus.BAD_GATEWAY,
         handler.handleTransport(new ResourceAccessException("timeout")).getStatusCode());
   }
+
+  @Test
+  void handleClientDisconnectWritesNothing() {
+    GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    assertDoesNotThrow(
+        () -> handler.handleClientDisconnect(new java.io.IOException("broken pipe")));
+  }
 }

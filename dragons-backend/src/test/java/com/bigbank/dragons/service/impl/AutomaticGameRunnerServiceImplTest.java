@@ -3,18 +3,7 @@ package com.bigbank.dragons.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.bigbank.dragons.api.dto.GameResultDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
@@ -253,13 +242,15 @@ class AutomaticGameRunnerServiceImplTest {
   }
 
   @Test
-  void playGameStreamingHandlesException() {
+  void playGameStreamingSendsFailureEventAndCompletesOnException() throws Exception {
     SseEmitter emitter = mock(SseEmitter.class);
     when(gameService.start()).thenThrow(new RuntimeException("API error"));
 
     runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
 
-    verify(emitter).completeWithError(any(RuntimeException.class));
+    verify(emitter).send(any(SseEmitter.SseEventBuilder.class));
+    verify(emitter).complete();
+    verify(emitter, never()).completeWithError(any());
   }
 
   @Test
@@ -324,5 +315,29 @@ class AutomaticGameRunnerServiceImplTest {
     verify(apiMapper, atLeastOnce()).toGameResultDto(state);
     verify(emitter, atLeastOnce()).send(any(SseEmitter.SseEventBuilder.class));
     verify(emitter).complete();
+  }
+
+  @Test
+  void playGameStreamingStopsQuietlyWhenClientDisconnects() throws Exception {
+    SseEmitter emitter = mock(SseEmitter.class);
+    when(strategyRegistry.resolve(StrategyType.EXPECTED_VALUE)).thenReturn(strategy);
+    when(gameService.start()).thenReturn(state);
+    when(state.isAlive()).thenReturn(true);
+    when(props.maxTurns()).thenReturn(10);
+    when(state.getTurn()).thenReturn(0);
+    when(state.getGameId()).thenReturn("game-1");
+
+    Message ad = mock(Message.class);
+    when(taskService.getTasks("game-1")).thenReturn(List.of(ad));
+    when(taskService.chooseTask(any(), eq(state), any(), eq(strategy))).thenReturn(ad);
+
+    doNothing()
+        .doThrow(new IOException("Connection reset by peer"))
+        .when(emitter)
+        .send(any(SseEmitter.SseEventBuilder.class));
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(emitter, never()).completeWithError(any()); // disconnect handled quietly, no cascade
   }
 }

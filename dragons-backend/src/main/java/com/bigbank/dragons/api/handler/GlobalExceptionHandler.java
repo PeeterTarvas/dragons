@@ -149,6 +149,16 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(pd);
   }
 
+  /**
+   * A broken client connection (an SSE client closed the stream). The response is already
+   * committed/aborted, so there is nothing to write — returning void tells Spring not to render a
+   * ProblemDetail (which can't be serialized to text/event-stream).
+   */
+  @ExceptionHandler(java.io.IOException.class)
+  public void handleClientDisconnect(java.io.IOException ex) {
+    log.debug("Client disconnected before the response completed: {}", ex.getMessage());
+  }
+
   private static Violation toViolation(ConstraintViolation<?> v) {
     String path = v.getPropertyPath().toString();
     String param = path.substring(path.lastIndexOf('.') + 1);

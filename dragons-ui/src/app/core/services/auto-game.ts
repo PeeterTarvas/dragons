@@ -10,13 +10,6 @@ export class AutoGame {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiUrl;
 
-  play(strategy?: string): Observable<GameResult> {
-    let params = new HttpParams();
-    if (strategy) {
-      params = params.set('strategy', strategy);
-    }
-    return this.http.post<GameResult>(`${this.base}/play`, null, { params });
-  }
 
   playBatch(games: number, strategy?: string): Observable<BatchStats> {
     let params = new HttpParams().set('games', games);
@@ -47,7 +40,12 @@ export class AutoGame {
           subscriber.error(new Error('Malformed SSE payload'));
         }
       };
-      // The server closes the stream by emitting an error event when done.
+
+      source.addEventListener('failed', (event) => {
+        source.close();
+        subscriber.error(new Error((event as MessageEvent).data || 'Auto run failed'));
+      });
+
       source.onerror = () => {
         source.close();
         subscriber.complete();

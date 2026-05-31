@@ -1,4 +1,4 @@
-import { Component, DestroyRef, afterNextRender, inject, signal } from '@angular/core';
+import { Component, DestroyRef, afterNextRender, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@ngneat/transloco';
 import { Subscription } from 'rxjs';
@@ -39,6 +39,11 @@ export class AutoRunnerPage {
     this.destroyRef.onDestroy(() => this.streamSub?.unsubscribe());
   }
 
+  protected readonly turns = computed(() => {
+    const current = this.result();
+    return current ? [...current.log].reverse() : [];
+  });
+
   protected onStart(strategy: string | null): void {
     this.streamSub?.unsubscribe();
     this.store.reset();
@@ -47,22 +52,25 @@ export class AutoRunnerPage {
     this.started.set(true);
     this.finished.set(false);
     this.running.set(true);
-    this.store.setLoading(true);
 
     this.streamSub = this.auto.stream(strategy ?? undefined).subscribe({
       next: (res) => {
         this.store.applyGameResult(res);
         this.result.set(res);
       },
-      error: () => {
-        this.store.setError('The automatic run was interrupted. Please try again.');
+      error: (err: unknown) => {
+        this.store.setError(
+          err instanceof Error && err.message
+            ? err.message
+            : 'The automatic run was interrupted. Please try again.',
+        );
         this.running.set(false);
-        this.store.setLoading(false);
+        this.finished.set(false);
+        this.started.set(false);
       },
       complete: () => {
         this.running.set(false);
         this.finished.set(true);
-        this.store.setLoading(false);
       },
     });
   }

@@ -63,7 +63,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                  @for (entry of gr.log; track $index) {
+                  @for (entry of turns(); track $index) {
                     <tr>
                       <td class="border border-black px-2 py-1 whitespace-nowrap">{{ entry.turn }}</td>
                       <td class="border border-black px-2 py-1 hidden sm:table-cell break-words">{{ entry.message }}</td>

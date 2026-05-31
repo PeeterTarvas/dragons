@@ -1,6 +1,8 @@
 package com.bigbank.dragons.service.impl;
 
 import com.bigbank.dragons.api.mapper.ApiMapper;
+import com.bigbank.dragons.client.exception.MugloarRateLimitException;
+import com.bigbank.dragons.client.exception.MugloarUnavailableException;
 import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.game.config.GameProperties;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -83,6 +86,11 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
 
   @Override
   public void playGameStreaming(StrategyType strategyType, SseEmitter emitter) {
+    AtomicBoolean clientConnected = new AtomicBoolean(true);
+    emitter.onCompletion(() -> clientConnected.set(false));
+    emitter.onTimeout(() -> clientConnected.set(false));
+    emitter.onError(ex -> clientConnected.set(false));
+
     try {
       GameState state = gameService.start();
       GameStrategy strategy = strategyRegistry.resolve(strategyType);
@@ -96,7 +104,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
 
       sendState(emitter, state);
 
-      while (state.isAlive() && state.getTurn() < props.maxTurns()) {
+      while (clientConnected.get() && state.isAlive() && state.getTurn() < props.maxTurns()) {
         List<Message> ads = taskService.getTasks(state.getGameId());
         Message ad = taskService.chooseTask(ads, state, estimator, strategy);
         turnExecutor.execute(state, ad, estimator);
@@ -104,8 +112,12 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
           shopService.shop(state, strategy);
         }
         sendState(emitter, state);
-        // No good solution here really
         Thread.sleep(100);
+      }
+
+      if (!clientConnected.get()) {
+        log.info("Streaming client disconnected; stopped game {}", state.getGameId());
+        return;
       }
 
       state.markReachedGoal(state.getScore() >= props.targetScore());
@@ -117,17 +129,34 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
           state.isReachedGoal());
 
       sendState(emitter, state);
-
       emitter.complete();
 
+    } catch (IOException e) {
+      log.info("Streaming client disconnected mid-game: {}", e.getMessage());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      log.info("Streaming interrupted before completion");
     } catch (Exception e) {
-      log.error("Streaming game interrupted/failed: {}", e.getMessage());
-      emitter.completeWithError(e);
+      log.error("Streaming game failed: {}", e.getMessage());
+      sendFailureQuietly(emitter, e);
+    }
+  }
+
+  private void sendFailureQuietly(SseEmitter emitter, Exception cause) {
+    String clientMessage =
+        (cause instanceof MugloarRateLimitException || cause instanceof MugloarUnavailableException)
+            ? "The game service is busy right now. Please try again in a moment."
+            : "The automatic run could not be completed. Please try again.";
+    try {
+      emitter.send(SseEmitter.event().name("failed").data(clientMessage));
+      emitter.complete();
+    } catch (Exception ex) {
+      log.warn("Could not deliver failure event to the client: {}", ex.getMessage());
     }
   }
 
   private void sendState(SseEmitter emitter, GameState state) throws IOException {
-    emitter.send(SseEmitter.event().data(apiMapper.toGameResultDto(state))); // no .name("turn")
+    emitter.send(SseEmitter.event().data(apiMapper.toGameResultDto(state)));
   }
 
   private GameState playGameSafely(StrategyType strategyType) {
