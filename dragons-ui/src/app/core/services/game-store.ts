@@ -54,6 +54,11 @@ export class GameStore {
     }
 
     effect(() => {
+
+      if (!isPlatformBrowser(this.platformId)) {
+        return;
+      }
+
       const stateToSave = {
         gameId: this.gameId(),
         lives: this.lives(),
@@ -69,6 +74,7 @@ export class GameStore {
       try {
         sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(stateToSave));
       } catch (e) {
+        console.warn('Failed to parse session storage', e);
       }
     });
   }

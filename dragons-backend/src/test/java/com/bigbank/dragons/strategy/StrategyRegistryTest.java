@@ -38,7 +38,7 @@ public class StrategyRegistryTest {
 
   @Test
   void resolveReturnsConfiguredDefaultWhenNullPassed() {
-    GameStrategy resolved = registry.resolve(null);
+    GameStrategy resolved = registry.resolve((StrategyType) null);
     assertEquals(
         expectedValueStrategy, resolved, "Should fallback to EXPECTED_VALUE based on config");
   }
@@ -49,5 +49,21 @@ public class StrategyRegistryTest {
     assertEquals(2, available.size());
     assertTrue(available.contains(StrategyType.EXPECTED_VALUE));
     assertTrue(available.contains(StrategyType.LOW_RISK));
+  }
+
+  @Test
+  void resolveStringReturnsExactMatchForValidKey() {
+    assertEquals(StrategyType.LOW_RISK, registry.resolve("low-risk"));
+  }
+
+  @Test
+  void resolveStringFallsBackToConfiguredStrategyForUnknownKey() {
+    assertEquals(StrategyType.EXPECTED_VALUE, registry.resolve("nonsense"));
+  }
+
+  @Test
+  void resolveStringFallsBackToExpectedValueWhenConfiguredAlsoInvalid() {
+    when(properties.strategy()).thenReturn("also-bogus");
+    assertEquals(StrategyType.EXPECTED_VALUE, registry.resolve("bogus"));
   }
 }

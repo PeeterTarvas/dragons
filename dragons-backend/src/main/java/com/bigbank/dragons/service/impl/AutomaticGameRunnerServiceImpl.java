@@ -127,7 +127,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
   }
 
   private void sendState(SseEmitter emitter, GameState state) throws IOException {
-    emitter.send(SseEmitter.event().name("turn").data(apiMapper.toGameResultDto(state)));
+    emitter.send(SseEmitter.event().data(apiMapper.toGameResultDto(state))); // no .name("turn")
   }
 
   private GameState playGameSafely(StrategyType strategyType) {

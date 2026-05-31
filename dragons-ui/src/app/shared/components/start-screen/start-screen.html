@@ -10,14 +10,19 @@
         {{ strategy }}
       </button>
     }
-    <button type="button" class="border-2 px-3 py-1"
-            [class.border-green-600]="isSelected(null)"
-            [class.border-black]="!isSelected(null)"
-            (click)="choose(null)">
-      {{ 'start.none' | transloco }}
-    </button>
+    @if (allowNone()) {
+      <button type="button" class="border-2 px-3 py-1"
+              [class.border-green-600]="isSelected(null)"
+              [class.border-black]="!isSelected(null)"
+              (click)="choose(null)">
+        {{ 'start.none' | transloco }}
+      </button>
+    }
   </div>
-  <button type="button" class="border-2 border-black px-4 py-2 font-semibold" (click)="emitStart()">
+  <button type="button"
+          class="border-2 border-black px-4 py-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="!canStart()"
+          (click)="emitStart()">
     {{ 'start.startGame' | transloco }}
   </button>
 </section>

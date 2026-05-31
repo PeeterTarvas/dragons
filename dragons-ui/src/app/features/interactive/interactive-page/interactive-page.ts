@@ -20,19 +20,18 @@ import { GameStore } from '../../../core/services/game-store';
 import { InteractiveGame } from '../../../core/services/interactive-game';
 import { AutoGame } from '../../../core/services/auto-game';
 import { Message } from '../../../core/models/message.model';
-import { StartScreen } from '../components/start-screen/start-screen';
 import { PlayerStats } from '../components/player-stats/player-stats';
 import { ErrorBanner } from '../../../shared/components/error-banner/error-banner';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner/loading-spinner';
+import { StartScreen } from '../../../shared/components/start-screen/start-screen';
 import {GameResult} from '../../../core/models/game-result.model';
 import {GameLog} from '../components/game-log/game-log';
 import {TranslocoPipe} from '@ngneat/transloco';
 
 
-
 @Component({
   selector: 'app-interactive-page',
-  imports: [ReactiveFormsModule, RouterLink, StartScreen, PlayerStats, ErrorBanner, LoadingSpinner, StartScreen, GameLog, TranslocoPipe],
+  imports: [ReactiveFormsModule, RouterLink, StartScreen, PlayerStats, ErrorBanner, LoadingSpinner, GameLog, TranslocoPipe],
   templateUrl: './interactive-page.html',
   styleUrl: './interactive-page.css',
 })

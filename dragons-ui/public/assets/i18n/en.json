@@ -81,6 +81,13 @@
   "auto": {
     "title": "Dragons — Auto-runner",
     "interactiveLink": "← Interactive",
-    "comingSoon": "Auto-runner coming soon."
+    "comingSoon": "Auto-runner coming soon.",
+    "subtitle": "Pick a strategy and watch the bot play automatically.",
+    "running": "Running…",
+    "finished": "Finished — final score:",
+    "stop": "Stop",
+    "newRun": "New run",
+    "goalReached": "1000+ reached",
+    "liveLog": "Live log"
   }
 }

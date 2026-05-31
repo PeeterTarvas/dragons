@@ -12,6 +12,7 @@ public class StrategyRegistry {
 
   private final Map<StrategyType, GameStrategy> byType = new EnumMap<>(StrategyType.class);
   private final StrategyType defaultStrategy;
+  private final GameProperties gameProperties;
 
   public StrategyRegistry(List<GameStrategy> strategies, GameProperties properties) {
     for (GameStrategy s : strategies) {
@@ -19,6 +20,7 @@ public class StrategyRegistry {
     }
     this.defaultStrategy =
         StrategyType.fromKey(properties.strategy()).orElse(StrategyType.EXPECTED_VALUE);
+    this.gameProperties = properties;
   }
 
   public GameStrategy resolve(StrategyType type) {
@@ -27,5 +29,13 @@ public class StrategyRegistry {
 
   public List<StrategyType> available() {
     return List.copyOf(byType.keySet());
+  }
+
+  public StrategyType resolve(String strategy) {
+    return StrategyType.fromKey(strategy)
+        .orElseGet(
+            () ->
+                StrategyType.fromKey(gameProperties.strategy())
+                    .orElse(StrategyType.EXPECTED_VALUE));
   }
 }
