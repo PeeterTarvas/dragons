@@ -13,7 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bigbank.dragons.client.MugloarClient;
-import com.bigbank.dragons.client.dto.BuyResponseDto;
+import com.bigbank.dragons.client.dto.BuyResponseClientDto;
 import com.bigbank.dragons.client.dto.ShopItemDto;
 import com.bigbank.dragons.client.mapper.ClientMapper;
 import com.bigbank.dragons.domain.BuyResponse;
@@ -51,7 +51,7 @@ public class ShopServiceImplTest {
     ShopItem item2 = new ShopItem("2", "Expensive Shield", 500);
 
     ShopItemDto itemDto = mock(ShopItemDto.class);
-    BuyResponseDto buyDto = mock(BuyResponseDto.class);
+    BuyResponseClientDto buyDto = mock(BuyResponseClientDto.class);
 
     when(state.getGameId()).thenReturn("game-id");
     when(state.getGold()).thenReturn(100);
@@ -75,7 +75,7 @@ public class ShopServiceImplTest {
   void buyItemFailedShoppingShouldLogWarnAndAddLogEntry() {
     GameState state = mock(GameState.class);
     ShopItem item = new ShopItem("1", "Broken Potion", 10);
-    BuyResponseDto buyDto = mock(BuyResponseDto.class);
+    BuyResponseClientDto buyDto = mock(BuyResponseClientDto.class);
     BuyResponse mockBuyFailure = new BuyResponse(false, 100, 3, 1, 2);
 
     when(state.getGameId()).thenReturn("game-id");
@@ -91,7 +91,7 @@ public class ShopServiceImplTest {
   @Test
   void buyItemLogsSuccessWhenPurchaseSucceeds() {
     GameState state = mock(GameState.class);
-    BuyResponseDto buyDto = mock(BuyResponseDto.class);
+    BuyResponseClientDto buyDto = mock(BuyResponseClientDto.class);
     ShopItem shopItem = new ShopItem("item-1", "item-1", 1);
     BuyResponse success = new BuyResponse(true, 150, 3, 5, 100);
     when(client.buy(state.getGameId(), shopItem.id())).thenReturn(buyDto);
@@ -118,7 +118,7 @@ public class ShopServiceImplTest {
     ShopItem item = new ShopItem("1", "Potion", 50);
 
     ShopItemDto itemDto = mock(ShopItemDto.class);
-    BuyResponseDto buyDto = mock(BuyResponseDto.class);
+    BuyResponseClientDto buyDto = mock(BuyResponseClientDto.class);
 
     when(state.getGameId()).thenReturn("game-id");
     when(state.getGold()).thenReturn(100);

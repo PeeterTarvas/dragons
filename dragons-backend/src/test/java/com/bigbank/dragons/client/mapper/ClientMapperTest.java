@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.bigbank.dragons.client.dto.BuyResponseDto;
+import com.bigbank.dragons.client.dto.BuyResponseClientDto;
 import com.bigbank.dragons.client.dto.MessageDto;
 import com.bigbank.dragons.client.dto.ReputationDto;
 import com.bigbank.dragons.client.dto.ShopItemDto;
@@ -80,12 +80,12 @@ public class ClientMapperTest {
 
   @Test
   void toDomainBuyResponseDtoReturnsNullWhenInputIsNull() {
-    assertNull(mapper.toDomain((BuyResponseDto) null));
+    assertNull(mapper.toDomain((BuyResponseClientDto) null));
   }
 
   @Test
   void toDomainBuyResponseDtoMapsAllFields() {
-    BuyResponseDto dto = new BuyResponseDto(true, 200, 3, 2, 7);
+    BuyResponseClientDto dto = new BuyResponseClientDto(true, 200, 3, 2, 7);
     BuyResponse domain = mapper.toDomain(dto);
     assertTrue(domain.shoppingSuccess());
     assertEquals(200, domain.gold());

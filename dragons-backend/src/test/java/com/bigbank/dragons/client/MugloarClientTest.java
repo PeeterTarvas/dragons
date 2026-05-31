@@ -6,12 +6,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.bigbank.dragons.client.dto.BuyResponseDto;
-import com.bigbank.dragons.client.dto.MessageDto;
-import com.bigbank.dragons.client.dto.ReputationDto;
-import com.bigbank.dragons.client.dto.ShopItemDto;
-import com.bigbank.dragons.client.dto.SolveResponseDto;
-import com.bigbank.dragons.client.dto.StartGameResponseDto;
+import com.bigbank.dragons.client.dto.*;
 import com.bigbank.dragons.client.exception.MugloarApiException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -251,15 +246,15 @@ class MugloarClientTest {
 
   @Test
   void buySuccessReturnsDto() {
-    BuyResponseDto expected = mock(BuyResponseDto.class);
+    BuyResponseClientDto expected = mock(BuyResponseClientDto.class);
     when(restClient
             .post()
             .uri("/api/v2/{gameId}/shop/buy/{itemId}", "game123", "item123")
             .retrieve()
-            .body(BuyResponseDto.class))
+            .body(BuyResponseClientDto.class))
         .thenReturn(expected);
 
-    BuyResponseDto result = client.buy("game123", "item123");
+    BuyResponseClientDto result = client.buy("game123", "item123");
 
     assertEquals(expected, result);
   }
@@ -270,7 +265,7 @@ class MugloarClientTest {
             .post()
             .uri("/api/v2/{gameId}/shop/buy/{itemId}", "game123", "item123")
             .retrieve()
-            .body(BuyResponseDto.class))
+            .body(BuyResponseClientDto.class))
         .thenReturn(null);
 
     MugloarApiException ex =

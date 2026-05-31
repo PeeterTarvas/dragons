@@ -1,12 +1,7 @@
 package com.bigbank.dragons.client;
 
 import com.bigbank.dragons.client.annotation.MugloarRetry;
-import com.bigbank.dragons.client.dto.BuyResponseDto;
-import com.bigbank.dragons.client.dto.MessageDto;
-import com.bigbank.dragons.client.dto.ReputationDto;
-import com.bigbank.dragons.client.dto.ShopItemDto;
-import com.bigbank.dragons.client.dto.SolveResponseDto;
-import com.bigbank.dragons.client.dto.StartGameResponseDto;
+import com.bigbank.dragons.client.dto.*;
 import com.bigbank.dragons.client.exception.MugloarApiException;
 import java.util.List;
 import java.util.Optional;
@@ -80,7 +75,7 @@ public class MugloarClient {
         .orElseThrow(() -> new MugloarApiException("Shop returned no items for game " + gameId));
   }
 
-  public BuyResponseDto buy(String gameId, String itemId) {
+  public BuyResponseClientDto buy(String gameId, String itemId) {
     requireNotBlank(gameId, "gameId");
     requireNotBlank(itemId, "itemId");
     return Optional.ofNullable(
@@ -88,7 +83,7 @@ public class MugloarClient {
                 .post()
                 .uri("/api/v2/{gameId}/shop/buy/{itemId}", gameId, itemId)
                 .retrieve()
-                .body(BuyResponseDto.class))
+                .body(BuyResponseClientDto.class))
         .orElseThrow(
             () ->
                 new MugloarApiException("Purchase returned an empty response for item " + itemId));

@@ -1,6 +1,6 @@
 package com.bigbank.dragons.client.mapper;
 
-import com.bigbank.dragons.client.dto.BuyResponseDto;
+import com.bigbank.dragons.client.dto.BuyResponseClientDto;
 import com.bigbank.dragons.client.dto.MessageDto;
 import com.bigbank.dragons.client.dto.ReputationDto;
 import com.bigbank.dragons.client.dto.ShopItemDto;
@@ -20,7 +20,7 @@ public interface ClientMapper {
 
   ShopItem toDomain(ShopItemDto dto);
 
-  BuyResponse toDomain(BuyResponseDto dto);
+  BuyResponse toDomain(BuyResponseClientDto dto);
 
   SolveResponse toDomain(SolveResponseDto dto);
 

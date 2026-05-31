@@ -88,7 +88,7 @@ public interface AutomaticGameApi {
   @Operation(
       summary = "Stream a game (Server-Sent Events)",
       description =
-          "Plays a game and streams the game state after every turn as SSE `turn` events until the "
+          "Plays a game and streams the game state after every turn as SSE events until the "
               + "game ends.")
   @ApiResponse(
       responseCode = "200",

@@ -74,9 +74,6 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
     SolveResponse result = turnExecutor.execute(session.getState(), ad, session.getEstimator());
 
     session.getState().markReachedGoal(session.getState().getScore() >= props.targetScore());
-    if (!session.getState().isAlive()) {
-      sessionStore.remove(gameId);
-    }
     return result;
   }
 
@@ -96,9 +93,7 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
 
   @Override
   public GameState getGameState(String gameId) {
-    GameSession session = sessionStore.get(gameId);
-    validator.validateGameIsActive(session);
-    return session.getState();
+    return sessionStore.get(gameId).getState();
   }
 
   private Board buildBoard(String gameId, Optional<GameStrategy> strategyOpt) {

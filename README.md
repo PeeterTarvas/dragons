@@ -1,5 +1,4 @@
 TODO:
-Docker
 final review
 readme
 
@@ -9,3 +8,4 @@ more unit testing FE + be
 
 
 turn log can cause ram buildup
+left play and stream as separate endpoints

@@ -137,7 +137,6 @@ public class InteractiveGameServiceImplTest {
     when(turnExecutor.execute(any(), any(), any())).thenReturn(solveResponse);
     when(mockState.getScore()).thenReturn(1500.0);
     when(props.targetScore()).thenReturn(1000.0);
-    when(mockState.isAlive()).thenReturn(true);
 
     SolveResponse result = service.solveAd("game-1", ad);
 
@@ -149,17 +148,20 @@ public class InteractiveGameServiceImplTest {
   }
 
   @Test
-  void solveAdGameDiesSessionIsRemoved() {
+  void solveAdGameOverRetainsSessionForLogViewing() {
     Message ad = mock(Message.class);
+    SolveResponse solveResponse = mock(SolveResponse.class);
 
     when(sessionStore.get("game-1")).thenReturn(mockSession);
     when(mockSession.getState()).thenReturn(mockState);
     when(mockSession.getEstimator()).thenReturn(mock(ProbabilityEstimator.class));
-    when(mockState.isAlive()).thenReturn(false);
+    when(turnExecutor.execute(any(), any(), any())).thenReturn(solveResponse);
+    when(mockState.getScore()).thenReturn(120.0);
+    when(props.targetScore()).thenReturn(1000.0);
 
     service.solveAd("game-1", ad);
 
-    verify(sessionStore).remove("game-1");
+    verify(sessionStore, never()).remove("game-1");
   }
 
   @Test
@@ -197,7 +199,7 @@ public class InteractiveGameServiceImplTest {
     GameState result = service.getGameState("game-1");
 
     assertEquals(mockState, result);
-    verify(validator).validateGameIsActive(mockSession);
+    verify(validator, never()).validateGameIsActive(any());
   }
 
   @Test
@@ -211,7 +213,6 @@ public class InteractiveGameServiceImplTest {
     when(turnExecutor.execute(any(), any(), any())).thenReturn(solveResponse);
     when(mockState.getScore()).thenReturn(500.0);
     when(props.targetScore()).thenReturn(1000.0);
-    when(mockState.isAlive()).thenReturn(true);
 
     SolveResponse result = service.solveAd("game-1", ad);
 
