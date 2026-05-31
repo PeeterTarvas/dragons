@@ -20,6 +20,9 @@ springdoc:
     operations-sorter: method
     tags-sorter: alpha
 
+emitter:
+  sse-emitter-timeout: 120000
+
 game:
   target-score: 1000
   max-turns: 1000

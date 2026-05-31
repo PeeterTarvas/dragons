@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/games")
 @Tag(name = "Interactive Game", description = "Turn-by-turn interactive play")
-public interface InteractiveGameApi {
+public interface InteractiveGameApiTemplate {
 
   @Operation(
       summary = "Start a new game",
@@ -42,7 +42,7 @@ public interface InteractiveGameApi {
   @Operation(
       summary = "Get the message board",
       description =
-          "Returns the ads available to solve, sorted by estimated success. When a strategy is "
+          "Returns the ads available to solve, sorted by estimated success. When a defaultStrategy is "
               + "supplied, the recommended ad ID is populated.")
   @ApiResponse(
       responseCode = "200",
@@ -50,7 +50,7 @@ public interface InteractiveGameApi {
       content = @Content(schema = @Schema(implementation = BoardDto.class)))
   @ApiResponse(
       responseCode = "400",
-      description = "Unknown strategy or invalid game ID",
+      description = "Unknown defaultStrategy or invalid game ID",
       content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
   @ApiResponse(
       responseCode = "404",
@@ -58,10 +58,9 @@ public interface InteractiveGameApi {
       content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
   @GetMapping("/{gameId}/board")
   @ResponseStatus(HttpStatus.OK)
-  BoardDto board(
-      @Parameter(description = "Unique game ID", example = "mAg6juyHkfBp") @PathVariable @NotBlank
-          String gameId,
-      @Parameter(description = "Recommendation strategy key", example = "expected-value")
+  BoardDto getBoard(
+      @Parameter(description = "Unique game ID") @PathVariable @NotBlank String gameId,
+      @Parameter(description = "Recommendation defaultStrategy key", example = "expected-value")
           @RequestParam(required = false)
           String strategy);
 
@@ -83,8 +82,7 @@ public interface InteractiveGameApi {
   @PostMapping("/{gameId}/solve")
   @ResponseStatus(HttpStatus.OK)
   SolveResponseDto solve(
-      @Parameter(description = "Unique game ID", example = "mAg6juyHkfBp") @PathVariable @NotBlank
-          String gameId,
+      @Parameter(description = "Unique game ID") @PathVariable @NotBlank String gameId,
       @Valid @RequestBody MessageDto ad);
 
   @Operation(summary = "List shop items", description = "Returns the items available to purchase.")
@@ -99,9 +97,8 @@ public interface InteractiveGameApi {
       content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
   @GetMapping("/{gameId}/shop")
   @ResponseStatus(HttpStatus.OK)
-  List<ShopItemDto> shop(
-      @Parameter(description = "Unique game ID", example = "mAg6juyHkfBp") @PathVariable @NotBlank
-          String gameId);
+  List<ShopItemDto> getShopItems(
+      @Parameter(description = "Unique game ID") @PathVariable @NotBlank String gameId);
 
   @Operation(
       summary = "Purchase a shop item",
@@ -121,8 +118,7 @@ public interface InteractiveGameApi {
   @PostMapping("/{gameId}/buy")
   @ResponseStatus(HttpStatus.OK)
   BuyResponseDto buy(
-      @Parameter(description = "Unique game ID", example = "mAg6juyHkfBp") @PathVariable @NotBlank
-          String gameId,
+      @Parameter(description = "Unique game ID") @PathVariable @NotBlank String gameId,
       @Valid @RequestBody ShopItemDto itemId);
 
   @Operation(
@@ -138,7 +134,6 @@ public interface InteractiveGameApi {
       content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
   @GetMapping("/{gameId}/state")
   @ResponseStatus(HttpStatus.OK)
-  GameResultDto state(
-      @Parameter(description = "Unique game ID", example = "mAg6juyHkfBp") @PathVariable @NotBlank
-          String gameId);
+  GameResultDto getState(
+      @Parameter(description = "Unique game ID") @PathVariable @NotBlank String gameId);
 }

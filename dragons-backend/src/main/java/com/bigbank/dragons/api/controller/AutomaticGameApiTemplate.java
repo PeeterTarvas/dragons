@@ -20,12 +20,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RequestMapping("/api")
 @Tag(name = "Game", description = "Automatic single, batch and streamed play")
-public interface AutomaticGameApi {
+public interface AutomaticGameApiTemplate {
 
   @Operation(
       summary = "Play one game automatically",
       description =
-          "Runs a complete game using the given strategy (falling back to the configured default) "
+          "Runs a complete game using the given defaultStrategy (falling back to the configured default) "
               + "and returns the final state and log.")
   @ApiResponse(
       responseCode = "200",
@@ -43,7 +43,7 @@ public interface AutomaticGameApi {
   @ResponseStatus(HttpStatus.OK)
   GameResultDto play(
       @Parameter(
-              description = "Strategy key; defaults to the configured strategy",
+              description = "Strategy key; defaults to the configured defaultStrategy",
               example = "expected-value")
           @RequestParam(required = false)
           String strategy);
@@ -57,25 +57,25 @@ public interface AutomaticGameApi {
       content = @Content(schema = @Schema(implementation = BatchStatsDto.class)))
   @ApiResponse(
       responseCode = "400",
-      description = "games out of the allowed 1..500 range",
+      description = "games out of the allowed 1..10 range",
       content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
   @PostMapping("/play/batch")
   @ResponseStatus(HttpStatus.OK)
   BatchStatsDto playBatch(
-      @Parameter(description = "Number of games to run (1..500)", example = "50")
+      @Parameter(description = "Number of games to run (1..10)", example = "2")
           @RequestParam(defaultValue = "2")
           @Min(1)
-          @Max(500)
+          @Max(10)
           int games,
       @Parameter(
-              description = "Strategy key; defaults to the configured strategy",
+              description = "Strategy key; defaults to the configured defaultStrategy",
               example = "expected-value")
           @RequestParam(required = false)
           String strategy);
 
   @Operation(
       summary = "List available strategies",
-      description = "Returns the strategy keys accepted by the play/stream endpoints.")
+      description = "Returns the defaultStrategy keys accepted by the play/stream endpoints.")
   @ApiResponse(
       responseCode = "200",
       description = "Strategy keys",
@@ -101,7 +101,7 @@ public interface AutomaticGameApi {
   @ResponseStatus(HttpStatus.OK)
   SseEmitter streamGame(
       @Parameter(
-              description = "Strategy key; defaults to the configured strategy",
+              description = "Strategy key; defaults to the configured defaultStrategy",
               example = "expected-value")
           @RequestParam(required = false)
           String strategy);

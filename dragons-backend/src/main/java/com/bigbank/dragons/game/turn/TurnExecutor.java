@@ -11,10 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Executes the mechanics of a single solve turn: call solve, update state, record the outcome,
- * append the turn log. Shared by autonomous and interactive play.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor

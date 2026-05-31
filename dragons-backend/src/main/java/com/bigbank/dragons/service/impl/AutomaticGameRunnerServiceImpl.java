@@ -9,7 +9,11 @@ import com.bigbank.dragons.game.config.GameProperties;
 import com.bigbank.dragons.game.state.GameState;
 import com.bigbank.dragons.game.turn.TurnExecutor;
 import com.bigbank.dragons.probability.ProbabilityEstimator;
-import com.bigbank.dragons.service.*;
+import com.bigbank.dragons.service.AutomaticGameRunnerService;
+import com.bigbank.dragons.service.GameService;
+import com.bigbank.dragons.service.ShopService;
+import com.bigbank.dragons.service.StatisticsService;
+import com.bigbank.dragons.service.TaskService;
 import com.bigbank.dragons.strategy.GameStrategy;
 import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
@@ -68,11 +72,11 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
       futures.add(batchExecutorService.submit(() -> playGameSafely(strategyType)));
     }
 
-    for (Future<GameState> f : futures) {
+    for (Future<GameState> future : futures) {
       try {
-        GameState gs = f.get();
-        if (gs != null) {
-          scores.add(gs.getScore());
+        GameState gameState = future.get();
+        if (gameState != null) {
+          scores.add(gameState.getScore());
         }
       } catch (Exception e) {
         log.warn("A game could not be started and was skipped: {}", e.getMessage());
@@ -89,7 +93,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
     AtomicBoolean clientConnected = new AtomicBoolean(true);
     emitter.onCompletion(() -> clientConnected.set(false));
     emitter.onTimeout(() -> clientConnected.set(false));
-    emitter.onError(ex -> clientConnected.set(false));
+    emitter.onError(_ -> clientConnected.set(false));
 
     try {
       GameState state = gameService.start();
@@ -112,7 +116,7 @@ public class AutomaticGameRunnerServiceImpl implements AutomaticGameRunnerServic
           shopService.shop(state, strategy);
         }
         sendState(emitter, state);
-        Thread.sleep(100);
+        Thread.sleep(100); // Needed this here, no cleaver ideas right now how to do it better
       }
 
       if (!clientConnected.get()) {

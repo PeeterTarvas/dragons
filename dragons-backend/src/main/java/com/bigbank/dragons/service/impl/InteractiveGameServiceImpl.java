@@ -22,7 +22,6 @@ import com.bigbank.dragons.strategy.StrategyRegistry;
 import com.bigbank.dragons.strategy.StrategyType;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,22 +52,33 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
 
   @Override
   public Board getBoard(String gameId) {
-    return buildBoard(gameId, Optional.empty());
+    GameSession session = activeSession(gameId);
+    List<Message> messages = refreshMessages(gameId, session);
+    return new Board(evaluate(messages, session), "");
   }
 
   @Override
   public Board getBoard(String gameId, String strategyKey) {
-    StrategyType type =
-        StrategyType.fromKey(strategyKey)
-            .orElseThrow(() -> new InvalidStrategyException("Unknown strategy: " + strategyKey));
+    GameStrategy strategy =
+        strategyRegistry.resolve(
+            StrategyType.fromKey(strategyKey)
+                .orElseThrow(
+                    () -> new InvalidStrategyException("Unknown defaultStrategy: " + strategyKey)));
 
-    return buildBoard(gameId, Optional.of(strategyRegistry.resolve(type)));
+    GameSession session = activeSession(gameId);
+    List<Message> messages = refreshMessages(gameId, session);
+
+    String recommendedAdId =
+        messages.isEmpty()
+            ? ""
+            : strategy.chooseAd(messages, session.getState(), session.getEstimator()).adId();
+
+    return new Board(evaluate(messages, session), recommendedAdId);
   }
 
   @Override
   public SolveResponse solveAd(String gameId, Message ad) {
-    GameSession session = sessionStore.get(gameId);
-    validator.validateGameIsActive(session);
+    GameSession session = activeSession(gameId);
     validator.validateMessage(session, ad);
 
     SolveResponse result = turnExecutor.execute(session.getState(), ad, session.getEstimator());
@@ -79,15 +89,13 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
 
   @Override
   public List<ShopItem> getShop(String gameId) {
-    GameSession session = sessionStore.get(gameId);
-    validator.validateGameIsActive(session);
+    GameSession session = activeSession(gameId);
     return shopService.getShopItems(session.getState());
   }
 
   @Override
   public BuyResponse buyItem(String gameId, ShopItem shopItem) {
-    GameSession session = sessionStore.get(gameId);
-    validator.validateGameIsActive(session);
+    GameSession session = activeSession(gameId);
     return shopService.buyItem(session.getState(), shopItem);
   }
 
@@ -96,26 +104,22 @@ public class InteractiveGameServiceImpl implements InteractiveGameService {
     return sessionStore.get(gameId).getState();
   }
 
-  private Board buildBoard(String gameId, Optional<GameStrategy> strategyOpt) {
+  private GameSession activeSession(String gameId) {
     GameSession session = sessionStore.get(gameId);
     validator.validateGameIsActive(session);
+    return session;
+  }
 
+  private List<Message> refreshMessages(String gameId, GameSession session) {
     List<Message> messages = taskService.getTasks(gameId);
     session.updateAvailableMessages(messages);
+    return messages;
+  }
 
-    Optional<String> recommendedAdIdOpt =
-        strategyOpt
-            .filter(_ -> !messages.isEmpty())
-            .map(
-                strat ->
-                    strat.chooseAd(messages, session.getState(), session.getEstimator()).adId());
-
-    List<EvaluatedMessage> evaluated =
-        messages.stream()
-            .map(message -> new EvaluatedMessage(message, session.getEstimator().estimate(message)))
-            .sorted(Comparator.comparing(EvaluatedMessage::estimatedSuccess).reversed())
-            .toList();
-    String recommendedAdId = recommendedAdIdOpt.orElse("");
-    return new Board(evaluated, recommendedAdId);
+  private List<EvaluatedMessage> evaluate(List<Message> messages, GameSession session) {
+    return messages.stream()
+        .map(message -> new EvaluatedMessage(message, session.getEstimator().estimate(message)))
+        .sorted(Comparator.comparing(EvaluatedMessage::estimatedSuccess).reversed())
+        .toList();
   }
 }

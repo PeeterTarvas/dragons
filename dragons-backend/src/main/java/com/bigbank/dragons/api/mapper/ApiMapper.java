@@ -1,7 +1,22 @@
 package com.bigbank.dragons.api.mapper;
 
-import com.bigbank.dragons.api.dto.*;
-import com.bigbank.dragons.domain.*;
+import com.bigbank.dragons.api.dto.BatchStatsDto;
+import com.bigbank.dragons.api.dto.BoardDto;
+import com.bigbank.dragons.api.dto.BuyResponseDto;
+import com.bigbank.dragons.api.dto.GameResultDto;
+import com.bigbank.dragons.api.dto.GameStateDto;
+import com.bigbank.dragons.api.dto.MessageDto;
+import com.bigbank.dragons.api.dto.ShopItemDto;
+import com.bigbank.dragons.api.dto.SolveResponseDto;
+import com.bigbank.dragons.api.dto.TurnLogDto;
+import com.bigbank.dragons.domain.BatchStats;
+import com.bigbank.dragons.domain.Board;
+import com.bigbank.dragons.domain.BuyResponse;
+import com.bigbank.dragons.domain.EvaluatedMessage;
+import com.bigbank.dragons.domain.Message;
+import com.bigbank.dragons.domain.ShopItem;
+import com.bigbank.dragons.domain.SolveResponse;
+import com.bigbank.dragons.domain.TurnLog;
 import com.bigbank.dragons.game.state.GameState;
 import java.util.List;
 import org.mapstruct.Mapper;

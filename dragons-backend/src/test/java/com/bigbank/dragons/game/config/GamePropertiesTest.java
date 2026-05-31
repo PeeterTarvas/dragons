@@ -14,7 +14,7 @@ public class GamePropertiesTest {
     assertEquals(1000, props.maxTurns());
     assertEquals(4, props.threadPoolSize());
     assertEquals(50, props.batchSize());
-    assertEquals("expected-value", props.strategy());
+    assertEquals("expected-value", props.defaultStrategy());
     assertEquals(0.2, props.probabilityFloor());
     assertEquals(2, props.lowLivesThreshold());
     assertEquals(50, props.healingPotionMaxCost());
@@ -31,7 +31,7 @@ public class GamePropertiesTest {
     assertEquals(200, p.maxTurns());
     assertEquals(8, p.threadPoolSize());
     assertEquals(10, p.batchSize());
-    assertEquals("low-risk", p.strategy());
+    assertEquals("low-risk", p.defaultStrategy());
     assertEquals(0.3, p.probabilityFloor());
     assertEquals(3, p.lowLivesThreshold());
     assertEquals(40, p.healingPotionMaxCost());
@@ -52,7 +52,7 @@ public class GamePropertiesTest {
     GameProperties p =
         new GameProperties(null, null, null, null, null, null, null, null, null, null, null);
 
-    assertEquals("expected-value", p.strategy());
+    assertEquals("expected-value", p.defaultStrategy());
     assertEquals(200, p.goldReserve());
     assertEquals(1, p.sessionTtlMinutes());
   }

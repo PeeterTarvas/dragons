@@ -1,6 +1,10 @@
 package com.bigbank.dragons.client.mapper;
 
-import com.bigbank.dragons.client.dto.*;
+import com.bigbank.dragons.client.dto.BuyResponseClientDto;
+import com.bigbank.dragons.client.dto.MessageClientDto;
+import com.bigbank.dragons.client.dto.ReputationClientDto;
+import com.bigbank.dragons.client.dto.ShopItemClientDto;
+import com.bigbank.dragons.client.dto.SolveResponseClientDto;
 import com.bigbank.dragons.domain.BuyResponse;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.domain.Reputation;

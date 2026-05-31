@@ -1,7 +1,13 @@
 package com.bigbank.dragons.api.controller.impl;
 
-import com.bigbank.dragons.api.controller.InteractiveGameApi;
-import com.bigbank.dragons.api.dto.*;
+import com.bigbank.dragons.api.controller.InteractiveGameApiTemplate;
+import com.bigbank.dragons.api.dto.BoardDto;
+import com.bigbank.dragons.api.dto.BuyResponseDto;
+import com.bigbank.dragons.api.dto.GameResultDto;
+import com.bigbank.dragons.api.dto.GameStateDto;
+import com.bigbank.dragons.api.dto.MessageDto;
+import com.bigbank.dragons.api.dto.ShopItemDto;
+import com.bigbank.dragons.api.dto.SolveResponseDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
 import com.bigbank.dragons.domain.Board;
 import com.bigbank.dragons.service.InteractiveGameService;
@@ -14,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequiredArgsConstructor
-public class InteractiveGameController implements InteractiveGameApi {
+public class InteractiveGameController implements InteractiveGameApiTemplate {
 
   private final InteractiveGameService service;
   private final ApiMapper apiMapper;
@@ -25,7 +31,7 @@ public class InteractiveGameController implements InteractiveGameApi {
   }
 
   @Override
-  public BoardDto board(String gameId, String strategy) {
+  public BoardDto getBoard(String gameId, String strategy) {
     Board board =
         Optional.ofNullable(strategy)
             .map(strat -> service.getBoard(gameId, strat))
@@ -39,7 +45,7 @@ public class InteractiveGameController implements InteractiveGameApi {
   }
 
   @Override
-  public List<ShopItemDto> shop(String gameId) {
+  public List<ShopItemDto> getShopItems(String gameId) {
     return apiMapper.toListDto(service.getShop(gameId));
   }
 
@@ -49,7 +55,7 @@ public class InteractiveGameController implements InteractiveGameApi {
   }
 
   @Override
-  public GameResultDto state(String gameId) {
+  public GameResultDto getState(String gameId) {
     return apiMapper.toGameResultDto(service.getGameState(gameId));
   }
 }

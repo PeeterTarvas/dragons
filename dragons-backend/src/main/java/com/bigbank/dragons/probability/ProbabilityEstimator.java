@@ -42,7 +42,7 @@ public class ProbabilityEstimator {
   private void record(Probability probability, boolean success) {
     stats.compute(
         probability,
-        (key, currentObs) -> {
+        (_, currentObs) -> {
           if (currentObs == null) {
             return new Observation(success ? 1 : 0, 1);
           }
@@ -50,7 +50,6 @@ public class ProbabilityEstimator {
         });
   }
 
-  /** An immutable record to track statistics */
   private record Observation(int successes, int attempts) {
     public Observation addAttempt(boolean success) {
       return new Observation(this.successes + (success ? 1 : 0), this.attempts + 1);

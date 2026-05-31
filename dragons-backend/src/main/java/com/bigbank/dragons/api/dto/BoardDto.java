@@ -8,6 +8,6 @@ public record BoardDto(
     @Schema(description = "Ads currently available to solve, sorted by estimated success")
         List<MessageDto> ads,
     @Schema(
-            description = "ID of the ad the chosen strategy recommends, or empty if none",
+            description = "ID of the ad the chosen defaultStrategy recommends, or empty if none",
             example = "a1b2c3")
         String recommendedAdId) {}

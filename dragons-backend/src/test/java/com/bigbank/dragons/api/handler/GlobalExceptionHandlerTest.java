@@ -110,12 +110,12 @@ public class GlobalExceptionHandlerTest {
 
   @Test
   void handleInvalidStrategyReturnsBadRequest() {
-    InvalidStrategyException ex = new InvalidStrategyException("Unknown strategy key");
+    InvalidStrategyException ex = new InvalidStrategyException("Unknown defaultStrategy key");
     ResponseEntity<ProblemDetail> response = handler.handleInvalidStrategy(ex);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertEquals("Unknown strategy key", response.getBody().getDetail());
-    assertEquals("Invalid strategy", response.getBody().getTitle());
+    assertEquals("Unknown defaultStrategy key", response.getBody().getDetail());
+    assertEquals("Invalid defaultStrategy", response.getBody().getTitle());
   }
 
   @Test

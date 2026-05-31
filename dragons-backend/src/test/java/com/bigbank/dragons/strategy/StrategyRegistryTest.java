@@ -25,7 +25,7 @@ public class StrategyRegistryTest {
   void setUp() {
     when(expectedValueStrategy.type()).thenReturn(StrategyType.EXPECTED_VALUE);
     when(lowRiskStrategy.type()).thenReturn(StrategyType.LOW_RISK);
-    when(properties.strategy()).thenReturn("expected-value");
+    when(properties.defaultStrategy()).thenReturn("expected-value");
 
     registry = new StrategyRegistry(List.of(expectedValueStrategy, lowRiskStrategy), properties);
   }
@@ -63,7 +63,7 @@ public class StrategyRegistryTest {
 
   @Test
   void resolveStringFallsBackToExpectedValueWhenConfiguredAlsoInvalid() {
-    when(properties.strategy()).thenReturn("also-bogus");
+    when(properties.defaultStrategy()).thenReturn("also-bogus");
     assertEquals(StrategyType.EXPECTED_VALUE, registry.resolve("bogus"));
   }
 }

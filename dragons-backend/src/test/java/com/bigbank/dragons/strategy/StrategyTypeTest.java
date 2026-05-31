@@ -25,7 +25,7 @@ class StrategyTypeTest {
 
   @ParameterizedTest
   @NullAndEmptySource
-  @ValueSource(strings = {"invalid-strategy", "high-risk"})
+  @ValueSource(strings = {"invalid-defaultStrategy", "high-risk"})
   void fromKeyReturnsEmpty_ForInvalidOrNullKeys(String invalidKey) {
     Optional<StrategyType> result = StrategyType.fromKey(invalidKey);
     assertTrue(result.isEmpty());

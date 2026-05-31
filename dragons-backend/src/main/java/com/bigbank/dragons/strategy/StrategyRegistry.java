@@ -19,7 +19,7 @@ public class StrategyRegistry {
       byType.put(s.type(), s);
     }
     this.defaultStrategy =
-        StrategyType.fromKey(properties.strategy()).orElse(StrategyType.EXPECTED_VALUE);
+        StrategyType.fromKey(properties.defaultStrategy()).orElse(StrategyType.EXPECTED_VALUE);
     this.gameProperties = properties;
   }
 
@@ -35,7 +35,7 @@ public class StrategyRegistry {
     return StrategyType.fromKey(strategy)
         .orElseGet(
             () ->
-                StrategyType.fromKey(gameProperties.strategy())
+                StrategyType.fromKey(gameProperties.defaultStrategy())
                     .orElse(StrategyType.EXPECTED_VALUE));
   }
 }

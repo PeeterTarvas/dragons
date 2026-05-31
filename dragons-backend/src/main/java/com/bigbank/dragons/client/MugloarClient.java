@@ -1,7 +1,12 @@
 package com.bigbank.dragons.client;
 
 import com.bigbank.dragons.client.annotation.MugloarRetry;
-import com.bigbank.dragons.client.dto.*;
+import com.bigbank.dragons.client.dto.BuyResponseClientDto;
+import com.bigbank.dragons.client.dto.MessageClientDto;
+import com.bigbank.dragons.client.dto.ReputationClientDto;
+import com.bigbank.dragons.client.dto.ShopItemClientDto;
+import com.bigbank.dragons.client.dto.SolveResponseClientDto;
+import com.bigbank.dragons.client.dto.StartGameResponseClientDto;
 import com.bigbank.dragons.client.exception.MugloarApiException;
 import java.util.List;
 import java.util.Optional;

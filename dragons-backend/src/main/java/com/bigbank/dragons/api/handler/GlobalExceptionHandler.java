@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(InvalidStrategyException.class)
   public ResponseEntity<ProblemDetail> handleInvalidStrategy(InvalidStrategyException ex) {
     ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    pd.setTitle("Invalid strategy");
+    pd.setTitle("Invalid defaultStrategy");
     pd.setProperty("timestamp", Instant.now());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
@@ -133,7 +133,8 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ProblemDetail> handleUpstreamUnavailable(MugloarUnavailableException ex) {
     ProblemDetail pd =
         ProblemDetail.forStatusAndDetail(
-            HttpStatus.SERVICE_UNAVAILABLE, "The game service is temporarily unavailable.");
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "The game service is temporarily unavailable: " + ex.getMessage());
     pd.setTitle("Upstream unavailable");
     pd.setProperty("timestamp", Instant.now());
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(pd);

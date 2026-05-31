@@ -9,10 +9,10 @@ public interface InteractiveGameService {
 
   GameState startGame();
 
-  /** Board without a strategy recommendation. */
+  /** Board without a defaultStrategy recommendation. */
   Board getBoard(@NotBlank String gameId);
 
-  /** Board with the named strategy's recommended pick. */
+  /** Board with the named defaultStrategy's recommended pick. */
   Board getBoard(@NotBlank String gameId, @NotBlank String strategyKey);
 
   SolveResponse solveAd(@NotBlank String gameId, Message adId);

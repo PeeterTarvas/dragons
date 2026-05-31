@@ -9,7 +9,7 @@ public record GameProperties(
     @DefaultValue("1000") Integer maxTurns,
     @DefaultValue("4") Integer threadPoolSize,
     @DefaultValue("50") Integer batchSize,
-    @DefaultValue("expected-value") String strategy,
+    @DefaultValue("expected-value") String defaultStrategy,
     @DefaultValue("0.2") Double probabilityFloor,
     @DefaultValue("2") Integer lowLivesThreshold,
     @DefaultValue("50") Integer healingPotionMaxCost,
@@ -22,7 +22,7 @@ public record GameProperties(
     if (maxTurns != null && maxTurns <= 0) maxTurns = 1000;
     if (threadPoolSize != null && threadPoolSize <= 0) threadPoolSize = 4;
     if (batchSize != null && batchSize <= 0) batchSize = 50;
-    if (strategy == null || strategy.isBlank()) strategy = "expected-value";
+    if (defaultStrategy == null || defaultStrategy.isBlank()) defaultStrategy = "expected-value";
     if (probabilityFloor != null && probabilityFloor <= 0) probabilityFloor = 0.2;
     if (lowLivesThreshold != null && lowLivesThreshold <= 0) lowLivesThreshold = 2;
     if (healingPotionMaxCost != null && healingPotionMaxCost <= 0) healingPotionMaxCost = 50;

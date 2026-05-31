@@ -1,6 +1,6 @@
 package com.bigbank.dragons.api.controller.impl;
 
-import com.bigbank.dragons.api.controller.AutomaticGameApi;
+import com.bigbank.dragons.api.controller.AutomaticGameApiTemplate;
 import com.bigbank.dragons.api.dto.BatchStatsDto;
 import com.bigbank.dragons.api.dto.GameResultDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
@@ -10,17 +10,21 @@ import com.bigbank.dragons.strategy.StrategyType;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequiredArgsConstructor
-public class AutomaticGameController implements AutomaticGameApi {
+public class AutomaticGameController implements AutomaticGameApiTemplate {
 
   private final AutomaticGameRunnerService automaticGameRunnerService;
   private final ApiMapper apiMapper;
   private final StrategyRegistry strategyRegistry;
   private final ExecutorService batchExecutorService;
+
+  @Value("${emitter.sse-emitter-timeout}")
+  private Long sseEmitterTimeout;
 
   @Override
   public GameResultDto play(String strategy) {
@@ -41,7 +45,7 @@ public class AutomaticGameController implements AutomaticGameApi {
 
   @Override
   public SseEmitter streamGame(String strategy) {
-    SseEmitter emitter = new SseEmitter(120_000L);
+    SseEmitter emitter = new SseEmitter(sseEmitterTimeout);
     batchExecutorService.submit(
         () ->
             automaticGameRunnerService.playGameStreaming(

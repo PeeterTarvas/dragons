@@ -40,7 +40,6 @@ public class GameSessionStore {
     sessions.remove(gameId);
   }
 
-  /** Evicts abandoned sessions so the map doesn't grow unbounded. */
   @Scheduled(fixedRateString = "${game.session-eviction-rate-ms}")
   void evictExpired() {
     Instant cutoff = Instant.now().minus(ttl);

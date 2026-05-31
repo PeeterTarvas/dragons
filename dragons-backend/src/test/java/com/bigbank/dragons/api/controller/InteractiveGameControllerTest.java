@@ -46,7 +46,7 @@ public class InteractiveGameControllerTest {
   }
 
   @Test
-  void boardWithNullStrategyCallsServiceWithoutStrategy() {
+  void getBoardWithNullStrategyCallsServiceWithoutStrategy() {
     Board board = mock(Board.class);
     BoardDto expectedDto = mock(BoardDto.class);
     String gameId = "game-123";
@@ -54,7 +54,7 @@ public class InteractiveGameControllerTest {
     when(service.getBoard(gameId)).thenReturn(board);
     when(apiMapper.toDto(board)).thenReturn(expectedDto);
 
-    BoardDto result = controller.board(gameId, null);
+    BoardDto result = controller.getBoard(gameId, null);
 
     assertEquals(expectedDto, result);
     verify(service).getBoard(gameId);
@@ -62,7 +62,7 @@ public class InteractiveGameControllerTest {
   }
 
   @Test
-  void boardWithStrategyCallsServiceWithStrategy() {
+  void getBoardWithStrategyCallsServiceWithStrategy() {
     Board board = mock(Board.class);
     BoardDto expectedDto = mock(BoardDto.class);
     String gameId = "game-123";
@@ -71,7 +71,7 @@ public class InteractiveGameControllerTest {
     when(service.getBoard(gameId, strategy)).thenReturn(board);
     when(apiMapper.toDto(board)).thenReturn(expectedDto);
 
-    BoardDto result = controller.board(gameId, strategy);
+    BoardDto result = controller.getBoard(gameId, strategy);
 
     assertEquals(expectedDto, result);
     verify(service).getBoard(gameId, strategy);
@@ -96,7 +96,7 @@ public class InteractiveGameControllerTest {
   }
 
   @Test
-  void shopMapsAndReturnsShopList() {
+  void shopMapsAndReturnsGetShopItemsList() {
     String gameId = "game-123";
     List<ShopItem> domainItems = List.of(mock(ShopItem.class));
     List<ShopItemDto> expectedDtos = List.of(mock(ShopItemDto.class));
@@ -104,7 +104,7 @@ public class InteractiveGameControllerTest {
     when(service.getShop(gameId)).thenReturn(domainItems);
     when(apiMapper.toListDto(domainItems)).thenReturn(expectedDtos);
 
-    List<ShopItemDto> result = controller.shop(gameId);
+    List<ShopItemDto> result = controller.getShopItems(gameId);
 
     assertEquals(expectedDtos, result);
     verify(service).getShop(gameId);
@@ -129,7 +129,7 @@ public class InteractiveGameControllerTest {
   }
 
   @Test
-  void stateMapsDtoExecutesAndMapsResponse() {
+  void getStateMapsDtoExecutesAndMapsResponse() {
     String gameId = "game-123";
     GameState state = mock(GameState.class);
     GameResultDto expectedDto = mock(GameResultDto.class);
@@ -137,7 +137,7 @@ public class InteractiveGameControllerTest {
     when(service.getGameState(gameId)).thenReturn(state);
     when(apiMapper.toGameResultDto(state)).thenReturn(expectedDto);
 
-    GameResultDto result = controller.state(gameId);
+    GameResultDto result = controller.getState(gameId);
 
     assertEquals(expectedDto, result);
     verify(service).getGameState(gameId);
