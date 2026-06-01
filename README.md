@@ -71,6 +71,8 @@ cd dragons-backend && ./gradlew test jacocoTestReport
 cd dragons-ui && npm test
 ```
 
+![test-results.png](./test-results.png)
+
 ---
 
 ## Project layout
