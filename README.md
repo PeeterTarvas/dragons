@@ -78,6 +78,11 @@ FE also has some tests but didn't focus on them a lot, basically services and ma
 
 ---
 
+## Strategies:
+ - expected-value: tries to pick the best risk for the reward - can sometimes fail really easily but 95% of the time produces better results than 'low-risk'
+ - low-risk: lowest risk - also maximizes the value there - can be more stable than expected-value especially as a recommendation strategy for interactive mode
+
+
 ## Project layout
 
 **Backend** (`dragons-backend/src/main/java/com/bigbank/dragons`)

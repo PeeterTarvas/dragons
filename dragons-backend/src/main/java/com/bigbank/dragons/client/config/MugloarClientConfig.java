@@ -21,7 +21,7 @@ public class MugloarClientConfig {
     var requestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
 
     return RestClient.builder()
-        .baseUrl(properties.baseUrl() + "/api/v2")
+        .baseUrl(properties.baseUrl() + "/api/v2/")
         .requestFactory(requestFactory)
         .defaultStatusHandler(new MugloarResponseErrorHandler())
         .build();
