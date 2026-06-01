@@ -86,4 +86,14 @@ public class ProbabilityEstimatorTest {
     double estimate = estimator.estimate(message);
     assertTrue(estimate > 0.0 && estimate < 1.0);
   }
+
+  /** HMMM prior 0.5, weight 3: successes = 1 + 1.5 = 2.5; attempts = 2 + 3 = 5 -> 0.5 */
+  @Test
+  void recordAddsSuccessToAnExistingObservation() {
+    estimator.record(Probability.HMMM.label(), false);
+    estimator.record(Probability.HMMM.label(), true);
+
+    Message message = new Message("1", "Normal task", 100, 10, null, Probability.HMMM.label());
+    assertEquals(0.5, estimator.estimate(message), 0.001);
+  }
 }

@@ -100,4 +100,21 @@ public class AutomaticGameControllerTest {
     assertNotNull(result);
     verify(batchExecutorService).submit(any(Runnable.class));
   }
+
+  @Test
+  void streamGameResolvesStrategyAndStreamsToEmitter() {
+    when(strategyRegistry.resolve("low-risk")).thenReturn(StrategyType.LOW_RISK);
+    when(batchExecutorService.submit(any(Runnable.class)))
+        .thenAnswer(
+            inv -> {
+              inv.getArgument(0, Runnable.class).run();
+              return null;
+            });
+
+    SseEmitter result = controller.streamGame("low-risk");
+
+    assertNotNull(result);
+    verify(strategyRegistry).resolve("low-risk");
+    verify(automaticGameRunnerService).playGameStreaming(StrategyType.LOW_RISK, result);
+  }
 }

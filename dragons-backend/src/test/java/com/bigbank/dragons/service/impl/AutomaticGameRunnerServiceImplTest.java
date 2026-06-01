@@ -1,12 +1,12 @@
 package com.bigbank.dragons.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.bigbank.dragons.api.dto.GameResultDto;
 import com.bigbank.dragons.api.mapper.ApiMapper;
+import com.bigbank.dragons.client.exception.MugloarRateLimitException;
+import com.bigbank.dragons.client.exception.MugloarUnavailableException;
 import com.bigbank.dragons.domain.BatchStats;
 import com.bigbank.dragons.domain.Message;
 import com.bigbank.dragons.game.config.GameProperties;
@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -338,6 +340,138 @@ class AutomaticGameRunnerServiceImplTest {
 
     runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
 
-    verify(emitter, never()).completeWithError(any()); // disconnect handled quietly, no cascade
+    verify(emitter, never()).completeWithError(any());
+  }
+
+  @Test
+  void playGameStreamingStopsWhenClientDisconnectsMidLoop() {
+    SseEmitter emitter = mock(SseEmitter.class);
+    AtomicReference<Runnable> onCompletion = new AtomicReference<>();
+    doAnswer(
+            inv -> {
+              onCompletion.set(inv.getArgument(0));
+              return null;
+            })
+        .when(emitter)
+        .onCompletion(any());
+
+    when(strategyRegistry.resolve(StrategyType.EXPECTED_VALUE)).thenReturn(strategy);
+    when(gameService.start()).thenReturn(state);
+    when(state.isAlive()).thenReturn(true);
+    when(props.maxTurns()).thenReturn(10);
+    when(state.getTurn()).thenReturn(0);
+    when(state.getGameId()).thenReturn("game-1");
+
+    Message ad = mock(Message.class);
+    when(taskService.getTasks("game-1")).thenReturn(List.of(ad));
+    when(taskService.chooseTask(any(), eq(state), any(), eq(strategy))).thenReturn(ad);
+
+    doAnswer(
+            _ -> {
+              onCompletion.get().run();
+              return null;
+            })
+        .when(turnExecutor)
+        .execute(eq(state), eq(ad), any());
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(state, never()).markReachedGoal(anyBoolean());
+    verify(emitter, never()).complete();
+  }
+
+  @Test
+  void playGameStreamingLifecycleCallbacksRunSafely() {
+    SseEmitter emitter = mock(SseEmitter.class);
+    AtomicReference<Runnable> onCompletion = new AtomicReference<>();
+    AtomicReference<Runnable> onTimeout = new AtomicReference<>();
+    AtomicReference<Consumer<Throwable>> onError = new AtomicReference<>();
+    doAnswer(
+            inv -> {
+              onCompletion.set(inv.getArgument(0));
+              return null;
+            })
+        .when(emitter)
+        .onCompletion(any());
+    doAnswer(
+            inv -> {
+              onTimeout.set(inv.getArgument(0));
+              return null;
+            })
+        .when(emitter)
+        .onTimeout(any());
+    doAnswer(
+            inv -> {
+              onError.set(inv.getArgument(0));
+              return null;
+            })
+        .when(emitter)
+        .onError(any());
+
+    when(gameService.start()).thenThrow(new RuntimeException("stop early"));
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    assertDoesNotThrow(
+        () -> {
+          onCompletion.get().run();
+          onTimeout.get().run();
+          onError.get().accept(new RuntimeException("boom"));
+        });
+  }
+
+  @Test
+  void playGameStreamingSwallowsErrorWhenFailureCannotBeDelivered() throws Exception {
+    SseEmitter emitter = mock(SseEmitter.class);
+    when(gameService.start()).thenThrow(new MugloarRateLimitException("429", null));
+    doThrow(new IOException("broken pipe"))
+        .when(emitter)
+        .send(any(SseEmitter.SseEventBuilder.class));
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(emitter, never()).completeWithError(any());
+  }
+
+  @Test
+  void playGameStreamingReportsBusyMessageForUnavailableUpstream() throws IOException {
+    SseEmitter emitter = mock(SseEmitter.class);
+    when(gameService.start()).thenThrow(new MugloarUnavailableException("503"));
+
+    runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+
+    verify(emitter).send(any(SseEmitter.SseEventBuilder.class));
+    verify(emitter).complete();
+    verify(emitter, never()).completeWithError(any());
+  }
+
+  @Test
+  void playGameStreamingHandlesInterruptionDuringSleep() {
+    SseEmitter emitter = mock(SseEmitter.class);
+    when(strategyRegistry.resolve(StrategyType.EXPECTED_VALUE)).thenReturn(strategy);
+    when(gameService.start()).thenReturn(state);
+    when(state.isAlive()).thenReturn(true);
+    when(props.maxTurns()).thenReturn(10);
+    when(state.getTurn()).thenReturn(0);
+    when(state.getGameId()).thenReturn("game-1");
+
+    Message ad = mock(Message.class);
+    when(taskService.getTasks("game-1")).thenReturn(List.of(ad));
+    when(taskService.chooseTask(any(), eq(state), any(), eq(strategy))).thenReturn(ad);
+
+    doAnswer(
+            inv -> {
+              Thread.currentThread().interrupt();
+              return null;
+            })
+        .when(turnExecutor)
+        .execute(eq(state), eq(ad), any());
+
+    try {
+      runnerService.playGameStreaming(StrategyType.EXPECTED_VALUE, emitter);
+      verify(state, never()).markReachedGoal(anyBoolean());
+    } finally {
+      Thread.interrupted();
+    }
   }
 }

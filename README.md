@@ -62,16 +62,13 @@ npm start
 ```
 App → http://localhost:4200
 
-### Tests & quality
+### Tests
 ```bash
 # backend: unit tests + coverage report (build/reports/jacoco)
 cd dragons-backend && ./gradlew test jacocoTestReport
 
-# backend: format
-./gradlew spotlessApply
 
-# frontend: unit tests + lint
-cd dragons-ui && npm test && npm run lint
+cd dragons-ui && npm test
 ```
 
 ---
@@ -153,7 +150,7 @@ Tunable in `dragons-backend/src/main/resources/application.yaml`:
 - **Short session TTL.** `session-ttl-minutes: 1` — a finished game's log is only
   viewable for ~1 min after last access. It can be turned up, but I stayed with this.
 - **SSE error vs. completion is ambiguous.** `EventSource` can't read HTTP status, so
-  the backend sends an explicit `failed` event; a raw network drop still looks like a
+  the backend sends an explicit `failed` event -> a raw network drop still looks like a
   normal end-of-game.
 
 **Maintainability**
@@ -162,18 +159,12 @@ Tunable in `dragons-backend/src/main/resources/application.yaml`:
 - **Frontend:** `PlayerStats` is imported cross-feature (interactive → auto-runner);
   the live-log table duplicates `game-log`'s markup (extract a `TurnLogTable`); page
   subscriptions don't use `takeUntilDestroyed`.
-- **i18n:** `game-log.html` has a stray `'log.col.result '` key (trailing space) and a
-  pipe-precedence bug in the success/failed cell.
 
 ---
 
 ## Limitations
-
-- **In-memory, single-instance session store.** No persistence (sessions lost on
-  restart) and not horizontally scalable — would need Redis/DB + sticky or shared
-  sessions behind a load balancer.
 - **Bound to one upstream.** All play depends on `dragonsofmugloar.com`; its rate
-  limits cap throughput. Retry + jitter soften this but can't remove it.
+  limits cap throughput. Retry + jitter soften this but can't remove it. - Can be a problem in batch play.
 - **SSR adds complexity.** The Angular app is configured for server-side rendering,
   which the Nginx image doesn't use (it ships the static browser bundle). Browser-only
   APIs (`sessionStorage`, `EventSource`) are guarded for SSR.

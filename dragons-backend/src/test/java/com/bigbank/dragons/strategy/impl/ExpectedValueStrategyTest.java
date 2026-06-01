@@ -101,9 +101,23 @@ public class ExpectedValueStrategyTest {
     when(gameState.getLives()).thenReturn(2);
     when(gameState.getGold()).thenReturn(100);
 
-    ShopItem dearPotion = new ShopItem("p1", "Healing potion", 80); // > maxCost
+    ShopItem dearPotion = new ShopItem("p1", "Healing potion", 80);
 
     List<ShopItem> plan = strategy.choosePurchases(List.of(dearPotion), gameState);
+
+    assertEquals(0, plan.size());
+  }
+
+  @Test
+  void choosePurchasesSkipsUpgradeThatWouldBreachReserve() {
+    when(properties.lowLivesThreshold()).thenReturn(1);
+    when(properties.goldReserve()).thenReturn(100);
+    when(gameState.getLives()).thenReturn(5);
+    when(gameState.getGold()).thenReturn(120);
+
+    ShopItem upgrade = new ShopItem("u1", "Claw Sharpening", 50);
+
+    List<ShopItem> plan = strategy.choosePurchases(List.of(upgrade), gameState);
 
     assertEquals(0, plan.size());
   }

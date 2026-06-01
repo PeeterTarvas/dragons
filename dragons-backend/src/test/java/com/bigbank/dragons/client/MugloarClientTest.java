@@ -32,11 +32,7 @@ class MugloarClientTest {
   @Test
   void startGameSuccessReturnsDto() {
     StartGameResponseClientDto expected = mock(StartGameResponseClientDto.class);
-    when(restClient
-            .post()
-            .uri("/api/v2/game/start")
-            .retrieve()
-            .body(StartGameResponseClientDto.class))
+    when(restClient.post().uri("game/start").retrieve().body(StartGameResponseClientDto.class))
         .thenReturn(expected);
 
     StartGameResponseClientDto result = client.startGame();
@@ -46,11 +42,7 @@ class MugloarClientTest {
 
   @Test
   void startGameEmptyBodyThrowsException() {
-    when(restClient
-            .post()
-            .uri("/api/v2/game/start")
-            .retrieve()
-            .body(StartGameResponseClientDto.class))
+    when(restClient.post().uri("game/start").retrieve().body(StartGameResponseClientDto.class))
         .thenReturn(null);
 
     MugloarApiException ex = assertThrows(MugloarApiException.class, () -> client.startGame());
@@ -73,7 +65,7 @@ class MugloarClientTest {
     ReputationClientDto expected = mock(ReputationClientDto.class);
     when(restClient
             .post()
-            .uri("/api/v2/{gameId}/investigate/reputation", "game123")
+            .uri("{gameId}/investigate/reputation", "game123")
             .retrieve()
             .body(ReputationClientDto.class))
         .thenReturn(expected);
@@ -87,7 +79,7 @@ class MugloarClientTest {
   void investigateEmptyBodyThrowsException() {
     when(restClient
             .post()
-            .uri("/api/v2/{gameId}/investigate/reputation", "game123")
+            .uri("{gameId}/investigate/reputation", "game123")
             .retrieve()
             .body(ReputationClientDto.class))
         .thenReturn(null);
@@ -114,7 +106,7 @@ class MugloarClientTest {
     List<MessageClientDto> expected = List.of(mock(MessageClientDto.class));
     when(restClient
             .get()
-            .uri("/api/v2/{gameId}/messages", "game123")
+            .uri("{gameId}/messages", "game123")
             .retrieve()
             .body(any(ParameterizedTypeReference.class)))
         .thenReturn(expected);
@@ -129,7 +121,7 @@ class MugloarClientTest {
   void getMessagesEmptyBodyThrowsException() {
     when(restClient
             .get()
-            .uri("/api/v2/{gameId}/messages", "game123")
+            .uri("{gameId}/messages", "game123")
             .retrieve()
             .body(any(ParameterizedTypeReference.class)))
         .thenReturn(null);
@@ -165,7 +157,7 @@ class MugloarClientTest {
     SolveResponseClientDto expected = mock(SolveResponseClientDto.class);
     when(restClient
             .post()
-            .uri("/api/v2/{gameId}/solve/{adId}", "game123", "ad123")
+            .uri("{gameId}/solve/{adId}", "game123", "ad123")
             .retrieve()
             .body(SolveResponseClientDto.class))
         .thenReturn(expected);
@@ -179,7 +171,7 @@ class MugloarClientTest {
   void solveEmptyBodyThrowsException() {
     when(restClient
             .post()
-            .uri("/api/v2/{gameId}/solve/{adId}", "game123", "ad123")
+            .uri("{gameId}/solve/{adId}", "game123", "ad123")
             .retrieve()
             .body(SolveResponseClientDto.class))
         .thenReturn(null);
@@ -206,7 +198,7 @@ class MugloarClientTest {
     List<ShopItemClientDto> expected = List.of(mock(ShopItemClientDto.class));
     when(restClient
             .get()
-            .uri("/api/v2/{gameId}/shop", "game123")
+            .uri("{gameId}/shop", "game123")
             .retrieve()
             .body(any(ParameterizedTypeReference.class)))
         .thenReturn(expected);
@@ -221,7 +213,7 @@ class MugloarClientTest {
   void getShopEmptyBodyThrowsException() {
     when(restClient
             .get()
-            .uri("/api/v2/{gameId}/shop", "game123")
+            .uri("{gameId}/shop", "game123")
             .retrieve()
             .body(any(ParameterizedTypeReference.class)))
         .thenReturn(null);
@@ -257,7 +249,7 @@ class MugloarClientTest {
     BuyResponseClientDto expected = mock(BuyResponseClientDto.class);
     when(restClient
             .post()
-            .uri("/api/v2/{gameId}/shop/buy/{itemId}", "game123", "item123")
+            .uri("{gameId}/shop/buy/{itemId}", "game123", "item123")
             .retrieve()
             .body(BuyResponseClientDto.class))
         .thenReturn(expected);
@@ -271,7 +263,7 @@ class MugloarClientTest {
   void buyEmptyBodyThrowsException() {
     when(restClient
             .post()
-            .uri("/api/v2/{gameId}/shop/buy/{itemId}", "game123", "item123")
+            .uri("{gameId}/shop/buy/{itemId}", "game123", "item123")
             .retrieve()
             .body(BuyResponseClientDto.class))
         .thenReturn(null);

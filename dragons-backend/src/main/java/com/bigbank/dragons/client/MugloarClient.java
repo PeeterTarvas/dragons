@@ -26,11 +26,7 @@ public class MugloarClient {
 
   public StartGameResponseClientDto startGame() {
     return Optional.ofNullable(
-            restClient
-                .post()
-                .uri("/api/v2/game/start")
-                .retrieve()
-                .body(StartGameResponseClientDto.class))
+            restClient.post().uri("game/start").retrieve().body(StartGameResponseClientDto.class))
         .orElseThrow(() -> new MugloarApiException("Start game returned an empty response"));
   }
 
@@ -39,7 +35,7 @@ public class MugloarClient {
     return Optional.ofNullable(
             restClient
                 .post()
-                .uri("/api/v2/{gameId}/investigate/reputation", gameId)
+                .uri("{gameId}/investigate/reputation", gameId)
                 .retrieve()
                 .body(ReputationClientDto.class))
         .orElseThrow(
@@ -53,7 +49,7 @@ public class MugloarClient {
     return Optional.ofNullable(
             restClient
                 .get()
-                .uri("/api/v2/{gameId}/messages", gameId)
+                .uri("{gameId}/messages", gameId)
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<MessageClientDto>>() {}))
         .orElseThrow(
@@ -66,7 +62,7 @@ public class MugloarClient {
     return Optional.ofNullable(
             restClient
                 .post()
-                .uri("/api/v2/{gameId}/solve/{adId}", gameId, adId)
+                .uri("{gameId}/solve/{adId}", gameId, adId)
                 .retrieve()
                 .body(SolveResponseClientDto.class))
         .orElseThrow(
@@ -78,7 +74,7 @@ public class MugloarClient {
     return Optional.ofNullable(
             restClient
                 .get()
-                .uri("/api/v2/{gameId}/shop", gameId)
+                .uri("{gameId}/shop", gameId)
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<ShopItemClientDto>>() {}))
         .orElseThrow(() -> new MugloarApiException("Shop returned no items for game " + gameId));
@@ -90,7 +86,7 @@ public class MugloarClient {
     return Optional.ofNullable(
             restClient
                 .post()
-                .uri("/api/v2/{gameId}/shop/buy/{itemId}", gameId, itemId)
+                .uri("{gameId}/shop/buy/{itemId}", gameId, itemId)
                 .retrieve()
                 .body(BuyResponseClientDto.class))
         .orElseThrow(

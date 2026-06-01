@@ -25,8 +25,9 @@ import { ErrorBanner } from '../../../shared/components/error-banner/error-banne
 import { LoadingSpinner } from '../../../shared/components/loading-spinner/loading-spinner';
 import { StartScreen } from '../../../shared/components/start-screen/start-screen';
 import {GameResult} from '../../../core/models/game-result.model';
-import {GameLog} from '../components/game-log/game-log';
+
 import {TranslocoPipe} from '@ngneat/transloco';
+import { GameLog } from '../components/game-log/game-log';
 
 
 @Component({
