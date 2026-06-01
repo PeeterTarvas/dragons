@@ -68,10 +68,13 @@ App → http://localhost:4200
 cd dragons-backend && ./gradlew test jacocoTestReport
 
 
-cd dragons-ui && npm test
+cd dragons-ui && npm test --watch=false
 ```
 
+Some minor config and exception logic didn't get covered:
 ![test-results.png](./test-results.png)
+
+FE also has some tests but didn't focus on them a lot, basically services and main components are covered.
 
 ---
 
