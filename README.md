@@ -161,6 +161,7 @@ Tunable in `dragons-backend/src/main/resources/application.yaml`:
   viewable for ~1 min after last access. It can be turned up, but I stayed with this.
 - **SSE error vs. completion is ambiguous.** `EventSource` can't read HTTP status, so
   the backend sends an explicit `failed` event -> a raw network drop still looks like a normal end-of-game.
+- ** InvestigateServiceImpl ** is not used in any meaningful way currently. Inunderstood that its related to some actikns but did not have time to fully map the logic out.
 
 **Maintainability**
 - `LowRiskStrategy` and `ExpectedValueStrategy` duplicate most of `choosePurchases`
