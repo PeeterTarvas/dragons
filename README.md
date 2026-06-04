@@ -176,14 +176,3 @@ Tunable in `dragons-backend/src/main/resources/application.yaml`:
 - **Bound to one upstream.** All play depends on `dragonsofmugloar.com`; its rate
   limits cap throughput. Retry + jitter soften this but can't remove it. - Can be a problem in batch play.
 
----
-
-## Requirements checklist
-
-- [x] Start a game, fetch & display ads, solve ads, buy shop items
-- [x] Display score / gold / lives
-- [x] State management (Angular signals via `GameStore`)
-- [x] Reaches 1000+ points automatically
-- [x] Error handling (RFC 7807 ProblemDetail, upstream retry/translation, input validation)
-- [x] Responsive + cross-browser (Tailwind, SSE with fallbacks)
-- [x] Unit tests (backend JUnit/Mockito + JaCoCo; frontend Vitest)
